@@ -6,19 +6,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PromotionDTO {
     private Long id;
     private String code;
     private String description;
     private Promotion.DiscountType discountType;
     private BigDecimal discountValue;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate startDate;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
     private Integer minNights;
     private Integer maxUses;
     private Integer usedCount;
-    private Boolean isActive;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public PromotionDTO() {
@@ -36,7 +41,6 @@ public class PromotionDTO {
         dto.setMinNights(promotion.getMinNights());
         dto.setMaxUses(promotion.getMaxUses());
         dto.setUsedCount(promotion.getUsedCount());
-        dto.setIsActive(promotion.getIsActive());
         dto.setCreatedAt(promotion.getCreatedAt());
         dto.setUpdatedAt(promotion.getUpdatedAt());
         return dto;
@@ -62,8 +66,6 @@ public class PromotionDTO {
     public void setMaxUses(Integer maxUses) { this.maxUses = maxUses; }
     public Integer getUsedCount() { return usedCount; }
     public void setUsedCount(Integer usedCount) { this.usedCount = usedCount; }
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

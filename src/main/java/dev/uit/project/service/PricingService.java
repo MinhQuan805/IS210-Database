@@ -125,7 +125,6 @@ public class PricingService {
         promotion.setMinNights(request.getMinNights());
         promotion.setMaxUses(request.getMaxUses());
         promotion.setUsedCount(0);
-        promotion.setIsActive(true);
 
         return PromotionDTO.fromEntity(promotionRepository.save(promotion));
     }
@@ -134,7 +133,6 @@ public class PricingService {
     public PromotionDTO togglePromotion(Long id) {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
-        promotion.setIsActive(!promotion.getIsActive());
         return PromotionDTO.fromEntity(promotionRepository.save(promotion));
     }
 }

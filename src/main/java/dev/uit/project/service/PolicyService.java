@@ -46,7 +46,6 @@ public class PolicyService {
 
         // Deactivate all policies of the same type
         policyRepository.findByType(policy.getType()).forEach(p -> {
-            p.setIsActive(false);
             policyRepository.save(p);
         });
 
@@ -56,7 +55,6 @@ public class PolicyService {
         newVersion.setTitle(policy.getTitle());
         newVersion.setContent(policy.getContent());
         newVersion.setLanguage(policy.getLanguage());
-        newVersion.setIsActive(true);
         newVersion.setVersion(policy.getVersion() + 1);
 
         return PolicyDTO.fromEntity(policyRepository.save(newVersion));
@@ -69,7 +67,6 @@ public class PolicyService {
         policy.setTitle(title);
         policy.setContent(content);
         policy.setLanguage(language != null ? language : "vi");
-        policy.setIsActive(true);
         policy.setVersion(1);
 
         return PolicyDTO.fromEntity(policyRepository.save(policy));

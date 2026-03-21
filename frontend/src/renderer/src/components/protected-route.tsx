@@ -18,10 +18,10 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps):
   // Check role-based access if allowedRoles is specified
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to the appropriate page based on user's actual role
-    if (['superadmin', 'admin', 'manager', 'staff'].includes(user.role)) {
+    if (['SUPERADMIN', 'ADMIN', 'MANAGER', 'RECEPTIONIST'].includes(user.role)) {
       return <Navigate to="/admin" replace />
     } else if (user.role === 'client') {
-      return <Navigate to="/client" replace />
+      return <Navigate to="/" replace />
     }
     // Fallback - logout and redirect to sign-in
     return <Navigate to="/sign-in" replace />
@@ -35,10 +35,10 @@ export function PublicRoute({ children }: { children: React.ReactNode }): React.
 
   if (isAuthenticated && user) {
     // Redirect authenticated users to their appropriate dashboard
-    if (['superadmin', 'admin', 'manager', 'staff'].includes(user.role)) {
+    if (['SUPERADMIN', 'ADMIN', 'MANAGER', 'RECEPTIONIST'].includes(user.role)) {
       return <Navigate to="/admin" replace />
     } else if (user.role === 'client') {
-      return <Navigate to="/client" replace />
+      return <Navigate to="/" replace />
     }
   }
 

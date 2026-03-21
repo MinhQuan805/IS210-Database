@@ -64,7 +64,7 @@ public class CustomerService {
         customer.setDateOfBirth(request.getDateOfBirth());
         customer.setAddress(request.getAddress());
         customer.setNotes(request.getNotes());
-        customer.setIsVIP(request.getIsVIP() != null ? request.getIsVIP() : false);
+        customer.setIsVIP((request.getIsVIP() != null && request.getIsVIP()) ? 1 : 0);
 
         return CustomerDTO.fromEntity(customerRepository.save(customer));
     }
@@ -88,7 +88,7 @@ public class CustomerService {
         if (request.getDateOfBirth() != null) customer.setDateOfBirth(request.getDateOfBirth());
         if (request.getAddress() != null) customer.setAddress(request.getAddress());
         if (request.getNotes() != null) customer.setNotes(request.getNotes());
-        if (request.getIsVIP() != null) customer.setIsVIP(request.getIsVIP());
+        if (request.getIsVIP() != null) customer.setIsVIP((request.getIsVIP() != null && request.getIsVIP()) ? 1 : 0);
 
         return CustomerDTO.fromEntity(customerRepository.save(customer));
     }

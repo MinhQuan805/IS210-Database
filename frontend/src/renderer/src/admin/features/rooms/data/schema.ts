@@ -1,3 +1,4 @@
+import { amenitiesSchema } from '@renderer/admin/features/amenities/data/schema'
 import { z } from 'zod'
 
 // Room status
@@ -17,7 +18,7 @@ export const roomTypeSchema = z.object({
   capacity: z.number(),
   basePrice: z.number(),
   images: z.array(z.string()).nullable().optional(),
-  amenities: z.array(z.string()).nullable().optional(),
+  amenities: z.array(amenitiesSchema).nullable().optional(),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional()
 })

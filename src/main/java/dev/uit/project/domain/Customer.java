@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -31,7 +33,7 @@ public class Customer {
 
     @Email
     @Size(max = 255)
-    @Column(unique = true, length = 255)
+    @Column(unique = true, length = 255, nullable = false)
     private String email;
 
     @Size(max = 20)
@@ -44,7 +46,7 @@ public class Customer {
 
     @Size(max = 50)
     @Column(length = 50)
-    private String nationality;
+    private String nationality = "Việt Nam";
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
@@ -57,14 +59,16 @@ public class Customer {
     private String notes;
 
     @Column(name = "is_vip", nullable = false)
-    private Boolean isVIP = false;
+    private Integer isVIP = 0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public Customer() {
@@ -150,11 +154,11 @@ public class Customer {
         this.notes = notes;
     }
 
-    public Boolean getIsVIP() {
+    public Integer getIsVIP() {
         return isVIP;
     }
 
-    public void setIsVIP(Boolean isVIP) {
+    public void setIsVIP(Integer isVIP) {
         this.isVIP = isVIP;
     }
 

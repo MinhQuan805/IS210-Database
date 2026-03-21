@@ -65,10 +65,10 @@ export function UserAuthForm({
       toast.success(`Chào mừng, ${authenticatedUser.name}!`)
 
       // Redirect based on role
-      if (['superadmin', 'admin', 'manager', 'staff'].includes(authenticatedUser.role)) {
+      if (['SUPERADMIN', 'ADMIN', 'MANAGER', 'RECEPTIONIST'].includes(authenticatedUser.role)) {
         navigate('/admin', { replace: true })
       } else {
-        navigate('/client', { replace: true })
+        navigate('/', { replace: true })
       }
     } catch (error) {
       toast.error('Đăng nhập thất bại', {

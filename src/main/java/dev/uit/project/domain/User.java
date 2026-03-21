@@ -12,6 +12,8 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -51,10 +53,12 @@ public class User {
 
 	@CreationTimestamp
 	@Column(name = "created_at", nullable = false, updatable = false)
+	@JsonFormat(pattern = "dd-MM-yyyy")
 	private LocalDateTime createdAt;
 
 	@UpdateTimestamp
 	@Column(name = "updated_at", nullable = false)
+	@JsonFormat(pattern = "dd-MM-yyyy")
 	private LocalDateTime updatedAt;
 
 	public User() {
@@ -149,17 +153,17 @@ public class User {
 	}
 
 	public enum UserRole {
-		superadmin,
-		admin,
-		manager,
-		staff,
-		client
+		SUPERADMIN,
+		ADMIN,
+		MANAGER,
+		RECEPTIONIST,
+		CLIENT
 	}
 
 	public enum UserStatus {
-		active,
-		inactive,
-		invited,
-		suspended
+		ACTIVE,
+		INACTIVE,
+		INVITED,
+		SUSPENDED
 	}
 }

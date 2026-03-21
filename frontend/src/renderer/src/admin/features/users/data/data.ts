@@ -15,23 +15,23 @@ export const statusColors = new Map<UserStatus, string>([
 // User roles with icons
 export const roles = [
   {
-    label: 'Superadmin',
-    value: 'superadmin',
+    label: 'SUPERADMIN',
+    value: 'SUPERADMIN',
     icon: Shield
   },
   {
-    label: 'Admin',
-    value: 'admin',
+    label: 'ADMIN',
+    value: 'ADMIN',
     icon: UserCheck
   },
   {
-    label: 'Manager',
-    value: 'manager',
+    label: 'MANAGER',
+    value: 'MANAGER',
     icon: Users
   },
   {
-    label: 'Staff',
-    value: 'staff',
+    label: 'RECEPTIONIST',
+    value: 'RECEPTIONIST',
     icon: CreditCard
   },
   {

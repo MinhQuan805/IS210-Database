@@ -5,6 +5,8 @@ import dev.uit.project.domain.Customer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class CustomerDTO {
     private Long id;
     private String firstName;
@@ -16,8 +18,10 @@ public class CustomerDTO {
     private LocalDate dateOfBirth;
     private String address;
     private String notes;
-    private Boolean isVIP;
+    private Integer isVIP;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public CustomerDTO() {
@@ -61,8 +65,8 @@ public class CustomerDTO {
     public void setAddress(String address) { this.address = address; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public Boolean getIsVIP() { return isVIP; }
-    public void setIsVIP(Boolean isVIP) { this.isVIP = isVIP; }
+    public Integer getIsVIP() { return isVIP; }
+    public void setIsVIP(Integer isVIP) { this.isVIP = isVIP; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

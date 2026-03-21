@@ -32,6 +32,8 @@ public class RoomService {
         return roomTypeRepository.findAll().stream().map(RoomTypeDTO::fromEntity).toList();
     }
 
+    
+
     @Transactional(readOnly = true)
     public RoomTypeDTO getRoomTypeById(Long id) {
         RoomType roomType = roomTypeRepository.findById(id)
@@ -70,8 +72,7 @@ public class RoomService {
 
     // Room operations
     @Transactional(readOnly = true)
-    public Page<RoomDTO> getAllRooms(Room.RoomStatus status, Long roomTypeId, Integer floor,
-                                     Pageable pageable) {
+    public Page<RoomDTO> getAllRooms(Room.RoomStatus status, Long roomTypeId, Integer floor, Pageable pageable) {
         Specification<Room> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (status != null) {

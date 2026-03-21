@@ -3,6 +3,7 @@ import { Toaster as Sonner, type ToasterProps } from 'sonner'
 const Toaster = ({ ...props }: ToasterProps): React.JSX.Element => {
   return (
     <Sonner
+      position="top-left"
       className="toaster group"
       style={
         {

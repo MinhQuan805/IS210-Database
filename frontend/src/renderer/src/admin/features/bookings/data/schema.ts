@@ -20,6 +20,8 @@ export const bookingSchema = z.object({
   checkInDate: z.string(),
   checkOutDate: z.string(),
   totalPrice: z.number(),
+  rawPrice: z.number(),
+  discountAmount: z.number(),
   status: bookingStatusSchema,
   specialRequests: z.string().nullable().optional(),
   createdAt: z.string().nullable().optional()

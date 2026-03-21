@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
+import { authApi } from '@renderer/lib/api-auth'
 
 const formSchema = z
   .object({
@@ -53,19 +54,19 @@ export function SignUpForm({
   async function onSubmit(data: z.infer<typeof formSchema>): Promise<void> {
     setIsLoading(true)
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      authApi.register(data)
 
-    // Mock registration - in a real app, this would call an API
-    console.log('Registration data:', data)
-
-    setIsLoading(false)
-    toast.success('Đăng ký thành công!', {
-      description: 'Vui lòng đăng nhập để tiếp tục'
-    })
-
-    // Redirect to sign-in page
-    navigate('/sign-in')
+      toast.success('Đăng ký thành công!', {
+        description: 'Vui lòng đăng nhập để tiếp tục'
+      })
+      navigate('/sign-in')
+    } catch (error) {
+      toast.error('Đăng ký thất bại, Hãy thử lại!')
+      console.log('Failed to registration: ', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

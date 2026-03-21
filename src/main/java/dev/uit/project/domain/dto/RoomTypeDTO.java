@@ -1,10 +1,13 @@
 package dev.uit.project.domain.dto;
 
+import dev.uit.project.domain.Amenity;
 import dev.uit.project.domain.RoomType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 public class RoomTypeDTO {
     private Long id;
@@ -13,8 +16,10 @@ public class RoomTypeDTO {
     private Integer capacity;
     private BigDecimal basePrice;
     private List<String> images;
-    private List<String> amenities;
+    private List<Amenity> amenities;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public RoomTypeDTO() {
@@ -46,8 +51,8 @@ public class RoomTypeDTO {
     public void setBasePrice(BigDecimal basePrice) { this.basePrice = basePrice; }
     public List<String> getImages() { return images; }
     public void setImages(List<String> images) { this.images = images; }
-    public List<String> getAmenities() { return amenities; }
-    public void setAmenities(List<String> amenities) { this.amenities = amenities; }
+    public List<Amenity> getAmenities() { return amenities; }
+    public void setAmenities(List<Amenity> amenities) { this.amenities = amenities; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

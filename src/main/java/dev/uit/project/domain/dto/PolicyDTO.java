@@ -4,14 +4,16 @@ import dev.uit.project.domain.Policy;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class PolicyDTO {
     private Long id;
     private Policy.PolicyType type;
     private String title;
     private String content;
     private String language;
-    private Boolean isActive;
     private Integer version;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public PolicyDTO() {
@@ -24,7 +26,6 @@ public class PolicyDTO {
         dto.setTitle(policy.getTitle());
         dto.setContent(policy.getContent());
         dto.setLanguage(policy.getLanguage());
-        dto.setIsActive(policy.getIsActive());
         dto.setVersion(policy.getVersion());
         dto.setUpdatedAt(policy.getUpdatedAt());
         return dto;
@@ -40,8 +41,6 @@ public class PolicyDTO {
     public void setContent(String content) { this.content = content; }
     public String getLanguage() { return language; }
     public void setLanguage(String language) { this.language = language; }
-    public Boolean getIsActive() { return isActive; }
-    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
     public Integer getVersion() { return version; }
     public void setVersion(Integer version) { this.version = version; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

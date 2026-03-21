@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { DatePicker } from '@/components/date-picker'
+import { DatePicker } from '@renderer/components/ui/date-picker'
 
 const languages = [
   { label: 'Tiếng Anh', value: 'en' },

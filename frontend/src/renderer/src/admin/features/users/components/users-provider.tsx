@@ -36,7 +36,7 @@ export function UsersProvider({ children }: UsersProviderProps) {
     try {
       setLoading(true)
       const data = await usersApi.list()
-      setUsers(data.content || [])
+      setUsers(data || [])
     } catch (error) {
       toast.error('Không thể tải danh sách người dùng.')
       console.error('Failed to fetch users:', error)

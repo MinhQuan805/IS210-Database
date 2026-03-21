@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,15 +29,25 @@ public class Booking {
 
     @NotNull
     @Column(name = "check_in_date", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkInDate;
 
     @NotNull
     @Column(name = "check_out_date", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkOutDate;
 
     @NotNull
     @Column(name = "total_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal totalPrice;
+
+    @NotNull
+    @Column(name = "raw_price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal rawPrice;
+
+    @NotNull
+    @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountAmount;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -47,7 +59,16 @@ public class Booking {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+
+    public enum BookingStatus {
+        PENDING,
+        CONFIRMED,
+        CHECKED_IN,
+        CHECKED_OUT,
+        CANCELLED
+    }
 
     public Booking() {
     }
@@ -100,6 +121,22 @@ public class Booking {
         this.totalPrice = totalPrice;
     }
 
+    public BigDecimal getRawPrice() {
+        return rawPrice;
+    }
+
+    public void setRawPrice(BigDecimal rawPrice) {
+        this.rawPrice = rawPrice;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
     public BookingStatus getStatus() {
         return status;
     }
@@ -124,11 +161,5 @@ public class Booking {
         this.createdAt = createdAt;
     }
 
-    public enum BookingStatus {
-        PENDING,
-        CONFIRMED,
-        CHECKED_IN,
-        CHECKED_OUT,
-        CANCELLED
-    }
+    
 }

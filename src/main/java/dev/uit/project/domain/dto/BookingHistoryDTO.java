@@ -4,11 +4,14 @@ import dev.uit.project.domain.BookingHistory;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class BookingHistoryDTO {
     private Long id;
     private Long bookingId;
     private String action;
     private String performedBy;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime timestamp;
     private String notes;
 

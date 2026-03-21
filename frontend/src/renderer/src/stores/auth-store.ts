@@ -4,7 +4,7 @@ import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 const ACCESS_TOKEN = 'hotel_access_token'
 const USER_DATA = 'hotel_user_data'
 
-export type UserRole = 'superadmin' | 'admin' | 'manager' | 'staff' | 'client'
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'MANAGER' | 'RECEPTIONIST' | 'client'
 
 export interface AuthUser {
   id: string
@@ -24,7 +24,7 @@ interface AuthState {
   logout: () => void
   isAdmin: () => boolean
   isClient: () => boolean
-  isSuperAdmin: () => boolean
+  isSUPERADMIN: () => boolean
   isManager: () => boolean
   isStaff: () => boolean
 }
@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>()((set, get) => {
 
     isAdmin: () => {
       const { user } = get()
-      return user?.role === 'admin' || user?.role === 'superadmin'
+      return user?.role === 'ADMIN' || user?.role === 'SUPERADMIN'
     },
 
     isClient: () => {
@@ -101,19 +101,19 @@ export const useAuthStore = create<AuthState>()((set, get) => {
       return user?.role === 'client'
     },
 
-    isSuperAdmin: () => {
+    isSUPERADMIN: () => {
       const { user } = get()
-      return user?.role === 'superadmin'
+      return user?.role === 'SUPERADMIN'
     },
 
     isManager: () => {
       const { user } = get()
-      return user?.role === 'manager'
+      return user?.role === 'MANAGER'
     },
 
     isStaff: () => {
       const { user } = get()
-      return user?.role === 'staff'
+      return user?.role === 'RECEPTIONIST'
     }
   }
 })

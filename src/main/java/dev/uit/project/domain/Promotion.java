@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,10 +40,12 @@ public class Promotion {
 
     @NotNull
     @Column(name = "start_date", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate startDate;
 
     @NotNull
     @Column(name = "end_date", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
     @Min(1)
@@ -54,15 +58,14 @@ public class Promotion {
     @Column(name = "used_count", nullable = false)
     private Integer usedCount = 0;
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public Promotion() {
@@ -146,14 +149,6 @@ public class Promotion {
 
     public void setUsedCount(Integer usedCount) {
         this.usedCount = usedCount;
-    }
-
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
     }
 
     public LocalDateTime getCreatedAt() {

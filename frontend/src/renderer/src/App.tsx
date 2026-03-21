@@ -4,66 +4,93 @@ import { LayoutProvider } from '@/context/layout-provider'
 import { ProtectedRoute, PublicRoute } from '@/components/protected-route'
 import { SignIn, SignUp } from '@/features/auth'
 import { AdminApp } from '@/admin'
+
 import { ClientApp } from '@/client'
+import SearchPage from '@renderer/client/SearchPage'
+import BookingDetailPage from '@renderer/client/BookingDetailPage'
+
+import Navbar from '@renderer/components/Navbar'
+import Footer from '@renderer/components/Footer'
 
 function AppRouter(): React.JSX.Element {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes - Auth Pages */}
-        <Route
-          path="/sign-in"
-          element={
-            <PublicRoute>
-              <SignIn />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/sign-up"
-          element={
-            <PublicRoute>
-              <SignUp />
-            </PublicRoute>
-          }
-        />
+    <Routes>
+      {/* Public Routes - Auth Pages */}
+      <Route
+        path="/sign-in"
+        element={
+          <PublicRoute>
+            <SignIn />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/sign-up"
+        element={
+          <PublicRoute>
+            <SignUp />
+          </PublicRoute>
+        }
+      />
 
-        {/* Protected Admin Routes */}
-        <Route
-          path="/admin/*"
-          element={
-            <ProtectedRoute allowedRoles={['superadmin', 'admin', 'manager', 'staff']}>
-              <AdminApp />
-            </ProtectedRoute>
-          }
-        />
+      {/* Protected Admin Routes */}
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute allowedRoles={['SUPERADMIN', 'ADMIN', 'MANAGER', 'RECEPTIONIST']}>
+            <AdminApp />
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Protected Client Routes */}
-        <Route
-          path="/client/*"
-          element={
-            <ProtectedRoute allowedRoles={['client']}>
-              <ClientApp />
-            </ProtectedRoute>
-          }
-        />
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <ClientApp />
+          </PublicRoute>
+        }
+      />
 
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/sign-in" replace />} />
+      <Route
+        path="/search"
+        element={
+          <PublicRoute>
+            <SearchPage />
+          </PublicRoute>
+        }
+      />
 
-        {/* Catch all - redirect to sign-in */}
-        <Route path="*" element={<Navigate to="/sign-in" replace />} />
-      </Routes>
-    </BrowserRouter>
+      <Route
+        path="/bookingdetail"
+        element={
+          <PublicRoute>
+            <BookingDetailPage />
+          </PublicRoute>
+        }
+      />
+
+      {/* Default redirect */}
+      {/* <Route path="/" element={<Navigate to="/sign-in" replace />} /> */}
+
+      {/* Catch all - redirect to client */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
 function App(): React.JSX.Element {
   return (
-    <LayoutProvider>
-      <AppRouter />
-      <Toaster position="top-right" richColors closeButton />
-    </LayoutProvider>
+    <BrowserRouter>
+      <LayoutProvider>
+        <Navbar />
+        <div className="w-full flex flex-col pt-14">
+          <AppRouter />
+          <Toaster position="top-right" richColors closeButton />
+        </div>
+        <Footer />
+      </LayoutProvider>
+    </BrowserRouter>
   )
 }
 

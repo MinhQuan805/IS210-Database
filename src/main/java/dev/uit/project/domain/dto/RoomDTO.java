@@ -4,6 +4,8 @@ import dev.uit.project.domain.Room;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class RoomDTO {
     private Long id;
     private Long roomTypeId;
@@ -12,7 +14,9 @@ public class RoomDTO {
     private Integer floor;
     private Room.RoomStatus status;
     private String notes;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public RoomDTO() {

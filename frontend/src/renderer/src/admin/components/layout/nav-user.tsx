@@ -18,6 +18,8 @@ import {
   useSidebar
 } from '@/components/ui/sidebar'
 
+import UserAvatar from '@renderer/admin/components/layout/UserAvatar'
+
 type NavUserProps = {
   user: {
     name: string
@@ -47,16 +49,7 @@ export function NavUser({ user }: NavUserProps) {
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">
-                    {user.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-start text-sm leading-tight">
-                  <span className="truncate font-semibold">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
-                </div>
+                <UserAvatar user={user} />
                 <ChevronsUpDown className="ms-auto size-4" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
@@ -67,18 +60,10 @@ export function NavUser({ user }: NavUserProps) {
               sideOffset={4}
             >
               <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">
-                      {user.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-start text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
-                    <span className="truncate text-xs">{user.email}</span>
-                  </div>
-                </div>
+                <UserAvatar
+                  user={user}
+                  className="flex items-center gap-2 px-1 py-1.5 text-start text-sm"
+                />
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem variant="destructive" onClick={handleSignOut}>

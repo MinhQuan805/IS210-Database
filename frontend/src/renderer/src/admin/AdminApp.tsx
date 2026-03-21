@@ -25,7 +25,9 @@ const Customers = lazy(() =>
   import('@/admin/features/customers').then((m) => ({ default: m.Customers }))
 )
 const Reports = lazy(() => import('@/admin/features/reports').then((m) => ({ default: m.Reports })))
-const Content = lazy(() => import('@/admin/features/content').then((m) => ({ default: m.Content })))
+const Content = lazy(() =>
+  import('@renderer/admin/features/policies').then((m) => ({ default: m.Content }))
+)
 const SettingsProfile = lazy(() =>
   import('@/admin/features/settings/profile').then((m) => ({ default: m.SettingsProfile }))
 )

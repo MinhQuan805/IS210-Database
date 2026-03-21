@@ -4,6 +4,8 @@ import dev.uit.project.domain.User;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 public class UserDTO {
     private Long id;
     private String firstName;
@@ -13,7 +15,9 @@ public class UserDTO {
     private String phoneNumber;
     private User.UserRole role;
     private User.UserStatus status;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public UserDTO() {

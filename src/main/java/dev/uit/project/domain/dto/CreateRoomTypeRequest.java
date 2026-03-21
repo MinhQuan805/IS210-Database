@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
 
+import dev.uit.project.domain.Amenity;
+
 public class CreateRoomTypeRequest {
 
     @NotBlank(message = "Room type name is required")
@@ -26,7 +28,7 @@ public class CreateRoomTypeRequest {
     private BigDecimal basePrice;
 
     private List<String> images;
-    private List<String> amenities;
+    private List<Amenity> amenities;
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -38,6 +40,6 @@ public class CreateRoomTypeRequest {
     public void setBasePrice(BigDecimal basePrice) { this.basePrice = basePrice; }
     public List<String> getImages() { return images; }
     public void setImages(List<String> images) { this.images = images; }
-    public List<String> getAmenities() { return amenities; }
-    public void setAmenities(List<String> amenities) { this.amenities = amenities; }
+    public List<Amenity> getAmenities() { return amenities; }
+    public void setAmenities(List<Amenity> amenities) { this.amenities = amenities; }
 }

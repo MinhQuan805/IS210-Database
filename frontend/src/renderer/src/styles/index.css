@@ -5,6 +5,23 @@
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
+  .bg-main {
+    background: #ffda73;
+    background: linear-gradient(90deg, rgba(255, 218, 115, 1) 0%, rgba(232, 194, 88, 1) 100%);
+  }
+
+  .text-main {
+    background: #ffda73;
+    background: linear-gradient(90deg, rgba(255, 218, 115, 1) 0%, rgba(232, 194, 88, 1) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .border-main {
+    border-color: #e8c258;
+  }
+
   * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;

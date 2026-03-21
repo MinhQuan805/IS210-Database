@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,17 +33,19 @@ public class Policy {
     @Column(length = 10)
     private String language = "vi";
 
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
-
     @Column(nullable = false)
     private Integer version = 1;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
-    public Policy() {
+    public enum PolicyType {
+        CANCELLATION,
+        TERMS,
+        PRIVACY,
+        CHECKIN_CHECKOUT
     }
 
     public Long getId() {
@@ -84,14 +88,6 @@ public class Policy {
         this.language = language;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public Integer getVersion() {
         return version;
     }
@@ -108,10 +104,5 @@ public class Policy {
         this.updatedAt = updatedAt;
     }
 
-    public enum PolicyType {
-        CANCELLATION,
-        TERMS,
-        PRIVACY,
-        CHECKIN_CHECKOUT
-    }
+    
 }

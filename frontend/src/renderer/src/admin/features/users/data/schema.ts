@@ -2,19 +2,19 @@ import { z } from 'zod'
 
 // User status schema
 export const userStatusSchema = z.union([
-  z.literal('active'),
-  z.literal('inactive'),
-  z.literal('invited'),
-  z.literal('suspended')
+  z.literal('ACTIVE'),
+  z.literal('INACTIVE'),
+  z.literal('INVITED'),
+  z.literal('SUSPENDED')
 ])
 export type UserStatus = z.infer<typeof userStatusSchema>
 
 // User role schema
 export const userRoleSchema = z.union([
-  z.literal('superadmin'),
-  z.literal('admin'),
-  z.literal('manager'),
-  z.literal('staff'),
+  z.literal('SUPERADMIN'),
+  z.literal('ADMIN'),
+  z.literal('MANAGER'),
+  z.literal('RECEPTIONIST'),
   z.literal('client')
 ])
 export type UserRole = z.infer<typeof userRoleSchema>
@@ -43,7 +43,7 @@ export const createUserSchema = z.object({
   username: z.string().min(3, 'Tên đăng nhập phải có ít nhất 3 ký tự.'),
   email: z.email('Email không hợp lệ.'),
   phoneNumber: z.string().optional().default(''),
-  status: userStatusSchema.default('active'),
+  status: userStatusSchema.default('ACTIVE'),
   role: userRoleSchema.default('client'),
   password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự.')
 })

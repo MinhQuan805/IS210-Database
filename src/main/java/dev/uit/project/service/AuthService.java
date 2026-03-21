@@ -36,11 +36,11 @@ public class AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        if (user.getStatus() != User.UserStatus.active) {
+        if (user.getStatus() != User.UserStatus.ACTIVE) {
             throw new RuntimeException("Account is not active. Status: " + user.getStatus());
         }
 
-        // Allow all roles: superadmin, admin, manager, staff, client
+        // Allow all roles: SUPERADMIN, admin, manager, staff, client
         // Role-based access control will be handled by the frontend routing
 
         String accessToken = "access-token-" + UUID.randomUUID();
@@ -76,8 +76,8 @@ public class AuthService {
         user.setEmail(request.getEmail());
         // Lưu password không mã hóa
         user.setPassword(request.getPassword());
-        user.setRole(User.UserRole.admin);
-        user.setStatus(User.UserStatus.active);
+        user.setRole(User.UserRole.CLIENT);
+        user.setStatus(User.UserStatus.ACTIVE);
         user.setPhoneNumber("");
 
         User savedUser = userRepository.save(user);

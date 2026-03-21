@@ -1,6 +1,6 @@
 import { api } from '@/admin/lib/api'
 
-export type UserRole = 'superadmin' | 'admin' | 'manager' | 'staff' | 'client'
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'MANAGER' | 'RECEPTIONIST' | 'client'
 export type UserStatus = 'active' | 'inactive' | 'invited' | 'suspended'
 
 export interface LoginRequest {

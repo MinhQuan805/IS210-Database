@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -42,20 +44,25 @@ public class RoomType {
 
     @ElementCollection
     @CollectionTable(name = "room_type_images", joinColumns = @JoinColumn(name = "room_type_id"))
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", length = 500, nullable = false)
     private List<String> images = new ArrayList<>();
 
-    @ElementCollection
-    @CollectionTable(name = "room_type_amenities", joinColumns = @JoinColumn(name = "room_type_id"))
-    @Column(name = "amenity", length = 100)
-    private List<String> amenities = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+            name = "room_type_amenities",
+            joinColumns = @JoinColumn(name = "room_type_id"),
+            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private List<Amenity> amenities = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
+    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public RoomType() {
@@ -109,11 +116,11 @@ public class RoomType {
         this.images = images;
     }
 
-    public List<String> getAmenities() {
+    public List<Amenity> getAmenities() {
         return amenities;
     }
 
-    public void setAmenities(List<String> amenities) {
+    public void setAmenities(List<Amenity> amenities) {
         this.amenities = amenities;
     }
 
