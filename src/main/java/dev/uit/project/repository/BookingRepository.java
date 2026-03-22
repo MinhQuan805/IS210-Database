@@ -75,4 +75,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
             @Param("bookingId") Long bookingId,
             @Param("email") String email
     );
+
+    Optional<Booking> findByIdAndCustomerEmail(Long id, String email);
 }

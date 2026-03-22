@@ -104,21 +104,48 @@ END;
 
 -- Giảm promotions.used_count
 
-CREATE OR REPLACE TRIGGER trg_booking_au_status
-AFTER UPDATE OF status ON bookings
+CREATE OR REPLACE TRIGGER trg_payment_confirm_booking
+AFTER INSERT OR UPDATE ON payment
+FOR EACH ROW
+DECLARE
+    v_total_paid NUMBER;
+    v_total_price NUMBER;
+BEGIN
+    IF :NEW.status = 'SUCCESS' THEN
+
+        SELECT NVL(SUM(amount), 0)
+        INTO v_total_paid
+        FROM payment
+        WHERE booking_id = :NEW.booking_id
+          AND status = 'SUCCESS';
+        
+        SELECT total_price
+        INTO v_total_price
+        FROM bookings
+        WHERE id = :NEW.booking_id;
+        
+        IF v_total_paid >= v_total_price THEN
+            UPDATE bookings
+            SET status = 'CONFIRMED'
+            WHERE id = :NEW.booking_id
+              AND status = 'PENDING';
+        END IF;
+
+    END IF;
+END;
+/
+
+-- Cập nhật bookings.status từ PENDING lên CONFIRM
+
+CREATE OR REPLACE TRIGGER trg_payment_confirm_booking
+AFTER INSERT OR UPDATE ON payment
 FOR EACH ROW
 BEGIN
-    IF :OLD.status != :NEW.status THEN
-        IF :NEW.status IN ('CHECKED_OUT', 'CANCELLED') THEN
-            UPDATE promotions p
-            SET used_count = used_count - 1
-            WHERE p.id IN (
-                SELECT bp.promotion_id
-                FROM booking_promotions bp
-                WHERE bp.booking_id = :NEW.id
-            );
-
-        END IF;
+    IF :NEW.status = 'SUCCESS' THEN
+        UPDATE bookings
+        SET status = 'CONFIRMED'
+        WHERE id = :NEW.booking_id
+          AND status = 'PENDING';
 
     END IF;
 END;

@@ -1,10 +1,15 @@
 package dev.uit.project.domain.dto;
 
 import dev.uit.project.domain.Booking;
+import dev.uit.project.domain.BookingHistory;
+import dev.uit.project.domain.Payment;
+import dev.uit.project.domain.Policy;
+import dev.uit.project.domain.Promotion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -25,6 +30,10 @@ public class BookingDTO {
     private BigDecimal discountAmount;
     private Booking.BookingStatus status;
     private String specialRequests;
+    private List<Payment> payments;
+    private List<BookingHistory> history;
+    private List<Policy> policies;
+    private List<Promotion> promotions;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
@@ -47,6 +56,10 @@ public class BookingDTO {
         dto.setDiscountAmount(booking.getDiscountAmount());
         dto.setStatus(booking.getStatus());
         dto.setSpecialRequests(booking.getSpecialRequests());
+        dto.setPayments(booking.getPayments());
+        dto.setHistory(booking.getHistory());
+        dto.setPolicies(booking.getPolicies());
+        dto.setPromotions(booking.getPromotions());
         dto.setCreatedAt(booking.getCreatedAt());
         return dto;
     }
@@ -171,5 +184,36 @@ public class BookingDTO {
         this.createdAt = createdAt;
     }
 
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public List<BookingHistory> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<BookingHistory> history) {
+        this.history = history;
+    }
+
+    public List<Policy> getPolicies() {
+        return policies;
+    }
+
+    public void setPolicies(List<Policy> policies) {
+        this.policies = policies;
+    }
+
+    public List<Promotion> getPromotions() {
+        return promotions;
+    }
+
+    public void setPromotions(List<Promotion> promotions) {
+        this.promotions = promotions;
+    }
     
 }

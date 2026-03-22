@@ -20,19 +20,17 @@ public class BookingService {
     private final CustomerRepository customerRepository;
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
-    private final PromotionRepository promotionRepository;
-    private final PolicyRepository policyRepository;
+    private final AmenityRepository amenityRepository;
 
     public BookingService(BookingRepository bookingRepository, BookingHistoryRepository bookingHistoryRepository,
             CustomerRepository customerRepository, RoomRepository roomRepository, RoomTypeRepository roomTypeRepository,
-            PromotionRepository promotionRepository, PolicyRepository policyRepository) {
+            AmenityRepository amenityRepository) {
         this.bookingRepository = bookingRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.customerRepository = customerRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
-        this.promotionRepository = promotionRepository;
-        this.policyRepository = policyRepository;
+        this.amenityRepository = amenityRepository;
     }
 
     @Transactional(readOnly = true)
@@ -163,33 +161,60 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public BookingDetailDTO getBookingDetail(Long bookingId, String email) {
-
-        // 1. Booking (core)
         Booking booking = bookingRepository
-                .getHalfBookingDetail(bookingId, email)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
+            .findByIdAndCustomerEmail(bookingId, email)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
 
-        // 2. History
-        List<BookingHistory> histories = bookingHistoryRepository.findByBookingId(bookingId);
-
-        // 3. Policy
-        List<Policy> policies = policyRepository.findByBookingId(bookingId);
-
-        // 4. Promotion
-       List<Promotion> promotions = promotionRepository.findByBookingId(bookingId);
-
-        // 5. Amenity (từ RoomType)
         RoomType roomType = roomTypeRepository
-                .findWithAmenities(booking.getRoom().getRoomType().getId())
-                .orElseThrow();
-
-        // 6. Assemble
+            .findByBookingId(bookingId)
+            .orElseThrow(() -> new RuntimeException("Room type not found"));
+        
+        List<Amenity> amenities = amenityRepository
+            .findByBookingId(bookingId);
+        
         BookingDetailDTO dto = new BookingDetailDTO();
-        dto.setBooking(booking);
-        dto.setHistories(histories);
-        dto.setPolicies(policies);
-        dto.setPromotions(promotions);
-        dto.setRoomType(roomType);
+
+        dto.setId(booking.getId());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setTotalPrice(booking.getTotalPrice());
+        dto.setRawPrice(booking.getRawPrice());
+        dto.setDiscountAmount(booking.getDiscountAmount());
+        dto.setStatus(booking.getStatus());
+        dto.setSpecialRequests(booking.getSpecialRequests());
+
+        dto.setRoomNumber(booking.getRoom().getRoomNumber());
+        dto.setFloor(booking.getRoom().getFloor());
+
+        dto.setAmenities(
+            amenities.stream()
+                .map(AmenityDTO::fromEntity)
+                .toList()
+        );
+
+        dto.setHistory(
+            booking.getHistory().stream()
+                .map(BookingHistoryDTO::fromEntity)
+                .toList()
+        );
+
+        dto.setPayments(
+            booking.getPayments().stream()
+                .map(PaymentDTO::fromEntity)
+                .toList()  
+        );
+
+        dto.setPromotions(
+            booking.getPromotions().stream()
+                .map(PromotionDTO::fromEntity)
+                .toList()
+        );
+
+        dto.setPolicies(
+            booking.getPolicies().stream()
+                .map(PolicyDTO::fromEntity)
+                .toList()
+        );
 
         return dto;
     }

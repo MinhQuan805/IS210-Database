@@ -9,10 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
-     @Query("""
-        SELECT DISTINCT rt FROM RoomType rt
-        LEFT JOIN FETCH rt.amenities
-        WHERE rt.id = :roomTypeId
+    @Query("""
+        SELECT r.roomType
+        FROM Booking b
+        JOIN b.room r
+        WHERE b.id = :bookingId
     """)
-    Optional<RoomType> findWithAmenities(@Param("roomTypeId") Long roomTypeId);
+    Optional<RoomType> findByBookingId(@Param("bookingId") Long bookingId);
 }

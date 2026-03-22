@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -57,6 +59,18 @@ public class Booking {
     @Column(name = "special_requests", length = 1000)
     private String specialRequests;
 
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingHistory> history = new ArrayList<>();
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingPolicy> bookingPolicies = new ArrayList<>();
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingPromotion> bookingPromotions = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     @JsonFormat(pattern = "dd-MM-yyyy")
@@ -68,6 +82,18 @@ public class Booking {
         CHECKED_IN,
         CHECKED_OUT,
         CANCELLED
+    }
+
+    public List<Policy> getPolicies() {
+    return bookingPolicies.stream()
+            .map(BookingPolicy::getPolicy)
+            .toList();
+    }
+
+    public List<Promotion> getPromotions() {
+        return bookingPromotions.stream()
+                .map(BookingPromotion::getPromotion)
+                .toList();
     }
 
     public Booking() {
@@ -159,6 +185,38 @@ public class Booking {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public List<BookingHistory> getHistory() {
+        return history;
+    }
+
+    public void setHistory(List<BookingHistory> history) {
+        this.history = history;
+    }
+
+    public List<BookingPolicy> getBookingPolicies() {
+        return bookingPolicies;
+    }
+
+    public void setBookingPolicies(List<BookingPolicy> bookingPolicies) {
+        this.bookingPolicies = bookingPolicies;
+    }
+
+    public List<BookingPromotion> getBookingPromotions() {
+        return bookingPromotions;
+    }
+
+    public void setBookingPromotions(List<BookingPromotion> bookingPromotions) {
+        this.bookingPromotions = bookingPromotions;
     }
 
     
