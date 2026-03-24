@@ -58,7 +58,6 @@ export const promotionSchema = z.object({
   minNights: z.number().nullable().optional(),
   maxUses: z.number().nullable().optional(),
   usedCount: z.number(),
-  isActive: z.boolean(),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional()
 })
@@ -72,7 +71,6 @@ export const createPromotionSchema = z.object({
   startDate: z.string().min(1, 'Ngày bắt đầu là bắt buộc.'),
   endDate: z.string().min(1, 'Ngày kết thúc là bắt buộc.'),
   minNights: z.number().min(0, 'Số đêm tối thiểu không được âm.').optional(),
-  maxUses: z.number().min(0, 'Số lần sử dụng tối đa không được âm.').optional(),
-  isActive: z.boolean().default(true)
+  maxUses: z.number().min(0, 'Số lần sử dụng tối đa không được âm.').optional()
 })
 export type CreatePromotionRequest = z.infer<typeof createPromotionSchema>

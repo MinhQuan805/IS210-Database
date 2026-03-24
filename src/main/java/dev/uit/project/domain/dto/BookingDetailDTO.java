@@ -10,6 +10,8 @@ import dev.uit.project.domain.Booking.BookingStatus;
 
 public class BookingDetailDTO {
     private Long id;
+    private String customerName;
+    private String customerEmail;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkInDate;
     @JsonFormat(pattern = "dd-MM-yyyy")
@@ -30,33 +32,28 @@ public class BookingDetailDTO {
     public BookingDetailDTO() {
     }
 
-    public BookingDetailDTO(Long id, LocalDate checkInDate, LocalDate checkOutDate, BigDecimal totalPrice,
-            BigDecimal rawPrice, BigDecimal discountAmount, BookingStatus status, String specialRequests,
-            String roomNumber, Integer floor, List<PaymentDTO> payments, List<BookingHistoryDTO> history,
-            List<PromotionDTO> promotions, List<PolicyDTO> policies, List<AmenityDTO> amenities) {
-        this.id = id;
-        this.checkInDate = checkInDate;
-        this.checkOutDate = checkOutDate;
-        this.totalPrice = totalPrice;
-        this.rawPrice = rawPrice;
-        this.discountAmount = discountAmount;
-        this.status = status;
-        this.specialRequests = specialRequests;
-        this.roomNumber = roomNumber;
-        this.floor = floor;
-        this.payments = payments;
-        this.history = history;
-        this.promotions = promotions;
-        this.policies = policies;
-        this.amenities = amenities;
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
     }
 
     public LocalDate getCheckInDate() {

@@ -102,7 +102,7 @@ BEGIN
 END;
 /
 
--- Giảm promotions.used_count
+-- Cập nhật bookings.status từ PENDING lên CONFIRM
 
 CREATE OR REPLACE TRIGGER trg_payment_confirm_booking
 AFTER INSERT OR UPDATE ON payment
@@ -130,22 +130,6 @@ BEGIN
             WHERE id = :NEW.booking_id
               AND status = 'PENDING';
         END IF;
-
-    END IF;
-END;
-/
-
--- Cập nhật bookings.status từ PENDING lên CONFIRM
-
-CREATE OR REPLACE TRIGGER trg_payment_confirm_booking
-AFTER INSERT OR UPDATE ON payment
-FOR EACH ROW
-BEGIN
-    IF :NEW.status = 'SUCCESS' THEN
-        UPDATE bookings
-        SET status = 'CONFIRMED'
-        WHERE id = :NEW.booking_id
-          AND status = 'PENDING';
 
     END IF;
 END;

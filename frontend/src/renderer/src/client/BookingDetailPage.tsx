@@ -20,7 +20,7 @@ import { BookingDetail } from '@renderer/admin/features/bookingDetails/data/sche
 
 const formSchema = z.object({
   customer_email: z.string().min(1, 'Email là bắt buộc').email('Email không hợp lệ'),
-  booking_id: z.string().min(1, 'Mã hóa đơn là bắt buộc')
+  booking_id: z.number('ID không hợp lệ').min(1, 'Mã hóa đơn là bắt buộc')
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -40,16 +40,17 @@ export default function BookingDetailPage() {
   const onSubmit = async (formVals: FormValues) => {
     try {
       setLoading(true)
+      setBookingDetails(null)
 
       const data = await bookingDetailApi.list({
-        id: Number(formVals.booking_id),
+        id: formVals.booking_id,
         email: formVals.customer_email
       })
 
       if (!data) toast.error('Không tìm thấy đơn đặt phòng nào!')
       else setBookingDetails(data)
     } catch (error) {
-      toast.error('Lỗi ')
+      toast.error('Không tìm thấy đơn đặt phòng nào!')
       console.log('Failed to fetch booking details: ', error)
     } finally {
       setLoading(false)
@@ -66,7 +67,11 @@ export default function BookingDetailPage() {
             {/* Booking ID */}
             <div className="flex flex-col gap-1">
               <Label htmlFor="booking_id">Mã đặt phòng</Label>
-              <Input id="booking_id" placeholder="1" {...register('booking_id')} />
+              <Input
+                id="booking_id"
+                placeholder="1"
+                {...register('booking_id', { valueAsNumber: true })}
+              />
               {errors.booking_id && (
                 <span className="text-red-500 text-sm">{errors.booking_id.message}</span>
               )}
@@ -103,7 +108,18 @@ export default function BookingDetailPage() {
           </CardContent>
         </Card>
       ) : (
-        bookingDetails && <BookingDetailCard bookingDetail={bookingDetails} />
+        bookingDetails && (
+          <>
+            <BookingDetailCard bookingDetail={bookingDetails} />
+            {bookingDetails.status === 'PENDING' && (
+              <div className="flex item-center justify-evenly">
+                <Button variant="outline">Chỉnh sửa</Button>
+                <Button variant="destructive">Hủy</Button>
+                <Button variant="default">Thanh toán ngay</Button>
+              </div>
+            )}
+          </>
+        )
       )}
     </div>
   )

@@ -2,6 +2,7 @@ package dev.uit.project.repository;
 
 import dev.uit.project.domain.Amenity;
 import dev.uit.project.domain.Booking;
+import dev.uit.project.domain.Room;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,16 +66,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
     List<Object[]> getPopularRoomTypes(@Param("startDate") LocalDate startDate, 
                                         @Param("endDate") LocalDate endDate);
 
-   @Query("""
-        SELECT b FROM Booking b
-        JOIN b.customer c
-        WHERE b.id = :bookingId
-        AND c.email = :email
-    """)
-    Optional<Booking> getHalfBookingDetail(
-            @Param("bookingId") Long bookingId,
-            @Param("email") String email
-    );
-
     Optional<Booking> findByIdAndCustomerEmail(Long id, String email);
+
+    
 }

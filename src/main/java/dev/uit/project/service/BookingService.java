@@ -183,6 +183,9 @@ public class BookingService {
         dto.setStatus(booking.getStatus());
         dto.setSpecialRequests(booking.getSpecialRequests());
 
+        dto.setCustomerName(booking.getCustomer().getFullName());
+        dto.setCustomerEmail(booking.getCustomer().getEmail());
+
         dto.setRoomNumber(booking.getRoom().getRoomNumber());
         dto.setFloor(booking.getRoom().getFloor());
 

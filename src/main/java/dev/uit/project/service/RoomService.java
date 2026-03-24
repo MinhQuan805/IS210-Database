@@ -116,8 +116,13 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate) {
-        return roomRepository.findAvailableRooms(checkInDate, checkOutDate)
+    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, int capacity) {
+        return roomRepository.findAvailableRooms(checkInDate, checkOutDate, capacity)
                 .stream().map(RoomDTO::fromEntity).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate) {
+        return getAvailableRooms(checkInDate, checkOutDate, 1000);
     }
 }
