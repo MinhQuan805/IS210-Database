@@ -1,12 +1,12 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { BookingDetail } from '@renderer/admin/features/bookingDetails/data/schema'
-import BookingsCard from '@renderer/admin/features/bookingDetails/components/BookingsCard'
-import HistoryCard from '@renderer/admin/features/bookingDetails/components/HistoryCard'
-import PromotionsCard from '@renderer/admin/features/bookingDetails/components/PromotionsCard'
-import PaymentsCard from '@renderer/admin/features/bookingDetails/components/PaymentsCard'
-import PoliciesCard from '@renderer/admin/features/bookingDetails/components/PoliciesCard'
-import AmenitiesCard from '@renderer/admin/features/bookingDetails/components/AmenitiesCard'
+import { BookingDetail } from '@renderer/client/bookingDetails/data/schema'
+import BookingsCard from '@renderer/client/bookingDetails/components/BookingsCard'
+import HistoryCard from '@renderer/client/bookingDetails/components/HistoryCard'
+import PromotionsCard from '@renderer/client/bookingDetails/components/PromotionsCard'
+import PaymentsCard from '@renderer/client/bookingDetails/components/PaymentsCard'
+import PoliciesCard from '@renderer/client/bookingDetails/components/PoliciesCard'
+import AmenitiesCard from '@renderer/client/bookingDetails/components/AmenitiesCard'
 
 export default function BookingDetailCard({ bookingDetail }: { bookingDetail: BookingDetail }) {
   return (

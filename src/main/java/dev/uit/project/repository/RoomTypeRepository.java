@@ -16,4 +16,11 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Long> {
         WHERE b.id = :bookingId
     """)
     Optional<RoomType> findByBookingId(@Param("bookingId") Long bookingId);
+
+    @Query("""
+        SELECT rt FROM RoomType rt
+        LEFT JOIN FETCH rt.amenities
+        WHERE rt.id = :id
+    """)
+    Optional<RoomType> findByIdWithAmenities(Long id);
 }

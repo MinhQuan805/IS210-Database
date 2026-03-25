@@ -6,8 +6,8 @@ import { SignIn, SignUp } from '@/features/auth'
 import { AdminApp } from '@/admin'
 
 import { ClientApp } from '@/client'
-import SearchPage from '@renderer/client/SearchPage'
-import BookingDetailPage from '@renderer/client/BookingDetailPage'
+import SearchPage from '@renderer/client/search/components/SearchPage'
+import BookingDetailPage from '@renderer/client/bookingDetails/components/BookingDetailPage'
 
 import Navbar from '@renderer/components/Navbar'
 import Footer from '@renderer/components/Footer'

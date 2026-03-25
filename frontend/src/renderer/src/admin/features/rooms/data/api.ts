@@ -32,6 +32,8 @@ export const roomsApi = {
   delete: (id: number) => api.delete<void>(`/admin/rooms/${id}`),
   updateStatus: (id: number, status: RoomStatus) =>
     api.put<Room>(`/admin/rooms/${id}/status?status=${status}`, {}),
-  available: (checkIn: string, checkOut: string) =>
-    api.get<Room[]>(`/admin/rooms/availability?checkInDate=${checkIn}&checkOutDate=${checkOut}`)
+  available: (checkIn: string, checkOut: string, capacity: number = 1000) =>
+    api.get<Room[]>(
+      `/admin/rooms/availability?checkInDate=${checkIn}&checkOutDate=${checkOut}&capacity=${capacity}`
+    )
 }

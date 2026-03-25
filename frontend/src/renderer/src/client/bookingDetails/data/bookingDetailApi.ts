@@ -1,5 +1,5 @@
 import { api } from '@/admin/lib/api'
-import { BookingDetail } from '@renderer/admin/features/bookingDetails/data/schema'
+import { BookingDetail } from '@renderer/client/bookingDetails/data/schema'
 
 export const bookingDetailApi = {
   list: (params: { id: number; email: string }) =>

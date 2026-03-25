@@ -7,17 +7,23 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 type DatePickerProps = {
   selected: Date | undefined
   onSelect: (date: Date | undefined) => void
+  className?: string
   placeholder?: string
 }
 
-export function DatePicker({ selected, onSelect, placeholder = 'Chọn ngày' }: DatePickerProps) {
+export function DatePicker({
+  selected,
+  onSelect,
+  className = '',
+  placeholder = 'Chọn ngày'
+}: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           data-empty={!selected}
-          className="w-[240px] justify-start text-start font-normal data-[empty=true]:text-muted-foreground"
+          className={`w-[240px] justify-start text-start font-normal data-[empty=true]:text-muted-foreground ${className}`}
         >
           {selected ? format(selected, 'dd/MM/yyyy') : <span>{placeholder}</span>}
           <CalendarIcon className="ms-auto h-4 w-4 opacity-50" />
@@ -29,7 +35,7 @@ export function DatePicker({ selected, onSelect, placeholder = 'Chọn ngày' }:
           captionLayout="dropdown"
           selected={selected}
           onSelect={onSelect}
-          disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')}
+          // disabled={(date: Date) => date > new Date() || date < new Date('1900-01-01')}
         />
       </PopoverContent>
     </Popover>

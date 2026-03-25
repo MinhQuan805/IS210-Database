@@ -16,26 +16,30 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
     List<Room> findByStatus(Room.RoomStatus status);
 
     List<Room> findByFloor(Integer floor);
+
+    @Query("SELECT r FROM Room r WHERE r.id NOT IN " +
+            "(SELECT b.room.id FROM Booking b WHERE b.status NOT IN ('CANCELLED', 'CHECKED_OUT') " +
+            "AND b.checkInDate < :checkOutDate AND b.checkOutDate > :checkInDate)")
+    List<Room> findAvailableRooms(@Param("checkInDate") LocalDate checkInDate,
+                                  @Param("checkOutDate") LocalDate checkOutDate);
     
     @Query("""
-        SELECT r FROM Room r
+        SELECT r 
+        FROM Room r
         JOIN r.roomType rt
         WHERE rt.capacity >= :capacity
-          AND r.status <> 'MAINTENANCE'
-          AND NOT EXISTS (
-              SELECT b FROM Booking b
-              WHERE b.room = r
-                AND b.status <> 'CANCELLED'
-                AND NOT (
-                    :checkOut <= b.checkInDate OR
-                    :checkIn >= b.checkOutDate
-                )
-          )
+        AND r.id NOT IN (
+                SELECT b.room.id 
+                FROM Booking b 
+                WHERE b.status NOT IN ('CANCELLED', 'CHECKED_OUT')
+                AND b.checkInDate < :checkOutDate
+                AND b.checkOutDate > :checkInDate
+        )
     """)
     List<Room> findAvailableRooms(
-        @Param("checkIn") LocalDate checkIn,
-        @Param("checkOut") LocalDate checkOut,
-        @Param("capacity") int capacity
+            @Param("checkInDate") LocalDate checkInDate,
+            @Param("checkOutDate") LocalDate checkOutDate,
+            @Param("capacity") int capacity
     );
 
     @Query("SELECT r.roomType.name, COUNT(r) FROM Room r GROUP BY r.roomType.name")

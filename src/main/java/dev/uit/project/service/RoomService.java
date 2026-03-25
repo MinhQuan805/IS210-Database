@@ -116,13 +116,24 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, int capacity) {
+    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate) {
+        return roomRepository.findAvailableRooms(checkInDate, checkOutDate)
+                .stream().map(RoomDTO::fromEntity).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate, Integer capacity) {
         return roomRepository.findAvailableRooms(checkInDate, checkOutDate, capacity)
                 .stream().map(RoomDTO::fromEntity).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<RoomDTO> getAvailableRooms(LocalDate checkInDate, LocalDate checkOutDate) {
-        return getAvailableRooms(checkInDate, checkOutDate, 1000);
+    public RoomTypeDTO getRoomTypeByRoomId(Long roomId) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + roomId));
+
+        RoomType roomType = room.getRoomType();
+
+        return RoomTypeDTO.fromEntity(roomType);
     }
 }

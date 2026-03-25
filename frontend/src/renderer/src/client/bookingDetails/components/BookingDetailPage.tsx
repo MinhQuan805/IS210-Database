@@ -13,10 +13,10 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-import BookingDetailCard from '@renderer/admin/features/bookingDetails/components/BookingDetailCard'
-import { bookingDetailApi } from '@renderer/admin/features/bookingDetails/data/bookingDetailApi'
+import BookingDetailCard from '@renderer/client/bookingDetails/components/BookingDetailCard'
+import { bookingDetailApi } from '@renderer/client/bookingDetails/data/bookingDetailApi'
 import { useState } from 'react'
-import { BookingDetail } from '@renderer/admin/features/bookingDetails/data/schema'
+import { BookingDetail } from '@renderer/client/bookingDetails/data/schema'
 
 const formSchema = z.object({
   customer_email: z.string().min(1, 'Email là bắt buộc').email('Email không hợp lệ'),

@@ -6,12 +6,16 @@ import dev.uit.project.domain.RoomType;
 import dev.uit.project.domain.SeasonalPrice;
 import dev.uit.project.domain.dto.*;
 import dev.uit.project.repository.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PricingService {
@@ -65,26 +69,84 @@ public class PricingService {
         seasonalPriceRepository.deleteById(id);
     }
 
-    // Daily Pricing
     @Transactional(readOnly = true)
     public List<DailyPriceDTO> getDailyPrices(Long roomTypeId, LocalDate startDate, LocalDate endDate) {
+        // TH1: Tìm price theo roomTypeId
         if (roomTypeId != null) {
+            // TH1.1: Tìm tất cả price theo phạm vi
             if (startDate != null && endDate != null) {
                 return dailyPriceRepository.findByRoomTypeIdAndDateBetween(roomTypeId, startDate, endDate)
-                        .stream().map(DailyPriceDTO::fromEntity).toList();
+                    .stream().map(DailyPriceDTO::fromEntity).toList();
             }
-            // Lấy tất cả daily prices cho roomType cụ thể
+            // TH1.2: Tìm tất cả price hiện có
             return dailyPriceRepository.findAll().stream()
                     .filter(dp -> dp.getRoomType().getId().equals(roomTypeId))
                     .map(DailyPriceDTO::fromEntity).toList();
         }
-        // Lấy tất cả daily prices
+
+        // TH2: Tìm tất cả price
+        // TH2.1: Tìm tất cả price theo phạm vi
         if (startDate != null && endDate != null) {
             return dailyPriceRepository.findAll().stream()
                     .filter(dp -> !dp.getDate().isBefore(startDate) && !dp.getDate().isAfter(endDate))
                     .map(DailyPriceDTO::fromEntity).toList();
         }
+
+        // TH2.2: Tìm tất cả price hiện có
         return dailyPriceRepository.findAll().stream().map(DailyPriceDTO::fromEntity).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SeasonalPriceDTO> getSeasonalPrices(Long roomTypeId, LocalDate startDate, LocalDate endDate) {
+        // TH1: Tìm price theo roomTypeId
+        if (roomTypeId != null) {
+            // TH1.1: Tìm tất cả price theo phạm vi
+            if (startDate != null && endDate != null) {
+                return seasonalPriceRepository
+                    .findByRoomTypeIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual( roomTypeId, endDate, startDate)
+                    .stream().map(SeasonalPriceDTO::fromEntity).toList();
+            }
+            // TH1.2: Tìm tất cả price hiện có
+            return seasonalPriceRepository.findAll().stream()
+                    .filter(sp -> sp.getRoomType().getId().equals(roomTypeId))
+                    .map(SeasonalPriceDTO::fromEntity)
+                    .toList();
+        }
+
+        // TH2: Tìm tất cả price
+        // TH2.1: Tìm tất cả price theo phạm vi
+        if (startDate != null && endDate != null) {
+            return seasonalPriceRepository.findAll().stream()
+                    .filter(sp ->
+                            !sp.getStartDate().isAfter(endDate) &&
+                            !sp.getEndDate().isBefore(startDate)
+                    )
+                    .map(SeasonalPriceDTO::fromEntity)
+                    .toList();
+        }
+
+        // TH2.2: Tìm tất cả price hiện có
+        return seasonalPriceRepository.findAll().stream()
+                .map(SeasonalPriceDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getDailyPrice(Long roomTypeId, LocalDate date) {
+        return dailyPriceRepository
+                .findByRoomTypeIdAndDate(roomTypeId, date)
+                .map(dp -> dp.getPrice())
+                .orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal getSeasonalMultiplier(Long roomTypeId, LocalDate date) {
+        return seasonalPriceRepository
+                .findByRoomTypeIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(roomTypeId, date, date)
+                .stream()
+                .max(Comparator.comparing(SeasonalPrice::getPriority))
+                .map(SeasonalPrice::getPriceMultiplier)
+                .orElse(null);
     }
 
     @Transactional
@@ -134,5 +196,30 @@ public class PricingService {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
         return PromotionDTO.fromEntity(promotionRepository.save(promotion));
+    }
+
+    @Transactional
+    public BigDecimal getRawPrice(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate) {
+
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new IllegalArgumentException("RoomType not found"));
+
+        BigDecimal basePrice = roomType.getBasePrice() != null ? roomType.getBasePrice() : BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+
+        long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate) + 1;
+
+        for (int i = 0; i < days; i++) {
+            LocalDate currDate = checkInDate.plusDays(i);
+
+            // Nếu null thì default
+            BigDecimal dailyPrice = Optional.ofNullable(getDailyPrice(roomTypeId, currDate)).orElse(BigDecimal.ZERO);
+            BigDecimal seasonalMultiplier = Optional.ofNullable(getSeasonalMultiplier(roomTypeId, currDate)).orElse(BigDecimal.ONE);
+
+            BigDecimal dayPrice = basePrice.add(dailyPrice).multiply(seasonalMultiplier);
+            total = total.add(dayPrice);
+        }
+
+        return total;
     }
 }

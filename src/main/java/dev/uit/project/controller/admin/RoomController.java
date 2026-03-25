@@ -2,6 +2,7 @@ package dev.uit.project.controller.admin;
 
 import dev.uit.project.domain.Room;
 import dev.uit.project.domain.dto.*;
+import dev.uit.project.service.RoomDetailService;
 import dev.uit.project.service.RoomService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -22,18 +23,11 @@ import java.util.Map;
 public class RoomController {
 
     private final RoomService roomService;
+    private final RoomDetailService roomDetailService;
 
-    public RoomController(RoomService roomService) {
+    public RoomController(RoomService roomService, RoomDetailService roomDetailService) {
         this.roomService = roomService;
-    }
-    @GetMapping({"/room-types"})
-    public ResponseEntity<List<RoomTypeDTO>> getAllRoomTypes() {
-        return ResponseEntity.ok(roomService.getAllRoomTypes());
-    }
-
-    @GetMapping({"/room-types/{id}"})
-    public ResponseEntity<RoomTypeDTO> getRoomTypeById(@PathVariable Long id) {
-        return ResponseEntity.ok(roomService.getRoomTypeById(id));
+        this.roomDetailService = roomDetailService;
     }
 
     @PostMapping({"/room-types"})
@@ -82,8 +76,17 @@ public class RoomController {
 
     @GetMapping("/rooms/availability")
     public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkInDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOutDate) {
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkInDate,
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkOutDate) {
         return ResponseEntity.ok(roomService.getAvailableRooms(checkInDate, checkOutDate));
+    }
+
+    @GetMapping("/rooms/availability/detail")
+    public ResponseEntity<List<RoomDetailDTO>> getAvailableRoomDetail(
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkInDate,
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkOutDate,
+            @RequestParam Integer capacity
+        ) {
+        return ResponseEntity.ok(roomDetailService.getAvailableRoomDetails(checkInDate, checkOutDate, capacity));
     }
 }
