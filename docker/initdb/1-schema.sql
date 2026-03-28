@@ -142,7 +142,7 @@ CREATE TABLE bookings (
     check_out_date DATE NOT NULL,
     total_price NUMBER(12,2) NOT NULL,
     raw_price NUMBER(12,2) NOT NULL,
-    discount_amount NUMBER(12,2) NOT NULL,
+    discount_amount NUMBER(12,2) DEFAULT 0 NOT NULL,
     status VARCHAR2(20) NOT NULL,
     special_requests VARCHAR2(1000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -160,7 +160,9 @@ CREATE TABLE booking_history (
     performed_by VARCHAR2(100),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     notes VARCHAR2(500),
-    CONSTRAINT fk_bhistory_booking FOREIGN KEY (booking_id) REFERENCES bookings(id)
+    CONSTRAINT fk_bhistory_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    CONSTRAINT chk_booking_history_action CHECK (action IN ('CREATED', 'CONFIRMED', 'CANCELLED', 'UPDATED')),
+    CONSTRAINT chk_booking_history_performed_by CHECK (performed_by IN ('SYSTEM', 'ADMIN', 'CUSTOMER'))
 );
 
 -- Bảng policies

@@ -1,35 +1,6 @@
 ALTER SESSION SET CONTAINER = FREEPDB1;
 ALTER SESSION SET CURRENT_SCHEMA = hotel;
 
--- Ghi nhận create bookings vào booking_history
-
-create or replace TRIGGER trg_booking_ai
-AFTER INSERT ON bookings
-FOR EACH ROW
-BEGIN
-    INSERT INTO booking_history (booking_id, action)
-    VALUES (:NEW.id, 'Tạo mới');
-END;
-/
-
--- Ghi nhận update bookings vào booking_history
-
-create or replace TRIGGER trg_booking_au
-AFTER UPDATE ON bookings
-FOR EACH ROW
-BEGIN
-    IF :OLD.status != :NEW.status THEN
-        INSERT INTO booking_history (booking_id, action)
-        VALUES (:NEW.id, 'Đổi trạng thái từ ' || :OLD.status || ' sang ' || :NEW.status);
-    END IF;
-
-    IF :OLD.room_id != :NEW.room_id THEN
-        INSERT INTO booking_history (booking_id, action)
-        VALUES (:NEW.id, 'Đổi phòng từ ' || :OLD.room_id || ' sang ' || :NEW.room_id);
-    END IF;
-END;
-/
-
 -- Cập nhật rooms.status
 
 create or replace TRIGGER trg_booking_room_status
@@ -48,7 +19,7 @@ BEGIN
 END;
 /
 
--- Tăng promotions.used_count
+-- promotions.used_count
 
 CREATE OR REPLACE TRIGGER trg_bpromo_biu
 BEFORE INSERT OR UPDATE ON booking_promotions
@@ -102,35 +73,84 @@ BEGIN
 END;
 /
 
--- Cập nhật bookings.status từ PENDING lên CONFIRM
+-- Kiểm tra số tiền đã thanh toán và cập nhật bookings.status
 
 CREATE OR REPLACE TRIGGER trg_payment_confirm_booking
-AFTER INSERT OR UPDATE ON payment
-FOR EACH ROW
-DECLARE
-    v_total_paid NUMBER;
-    v_total_price NUMBER;
-BEGIN
-    IF :NEW.status = 'SUCCESS' THEN
+FOR INSERT OR UPDATE ON payment
+COMPOUND TRIGGER
 
-        SELECT NVL(SUM(amount), 0)
-        INTO v_total_paid
-        FROM payment
-        WHERE booking_id = :NEW.booking_id
-          AND status = 'SUCCESS';
-        
-        SELECT total_price
-        INTO v_total_price
-        FROM bookings
-        WHERE id = :NEW.booking_id;
-        
-        IF v_total_paid >= v_total_price THEN
-            UPDATE bookings
-            SET status = 'CONFIRMED'
-            WHERE id = :NEW.booking_id
-              AND status = 'PENDING';
+    TYPE t_booking_id_list IS TABLE OF payment.booking_id%TYPE
+        INDEX BY PLS_INTEGER;
+
+    v_booking_ids  t_booking_id_list;
+    v_count        PLS_INTEGER := 0;
+
+    -- Sau khi mỗi dòng được ghi -> Lấy bookings.id của nó
+
+    AFTER EACH ROW IS
+    BEGIN
+        IF :NEW.status = 'SUCCESS' THEN
+            v_count := v_count + 1;
+            v_booking_ids(v_count) := :NEW.booking_id;
         END IF;
+    END AFTER EACH ROW;
 
-    END IF;
+    -- Sau khi chạy xong statements -> Kiểm tra số tiền đã thanh toán
+
+    AFTER STATEMENT IS
+        v_total_paid  NUMBER;
+        v_total_price NUMBER;
+    BEGIN
+        FOR i IN 1 .. v_count LOOP
+            -- Tổng tiền đã thanh toán thành công cho booking này
+            SELECT NVL(SUM(amount), 0)
+            INTO   v_total_paid
+            FROM   payment
+            WHERE  booking_id = v_booking_ids(i)
+              AND  status     = 'SUCCESS';
+
+            -- Tổng giá trị booking
+            SELECT total_price
+            INTO   v_total_price
+            FROM   bookings
+            WHERE  id = v_booking_ids(i);
+
+            -- Nếu đã thanh toán đủ -> xác nhận booking
+            IF v_total_paid >= v_total_price THEN
+
+                UPDATE bookings
+                SET    status = 'CONFIRMED'
+                WHERE  id     = v_booking_ids(i) AND  status = 'PENDING';
+
+                -- Chỉ ghi lịch sử nếu UPDATE thực sự xảy ra
+                IF SQL%ROWCOUNT > 0 THEN -- SQL%ROWCOUNT : số dòng được UPDATE
+                    INSERT INTO booking_history (
+                        booking_id, action, performed_by, notes
+                    ) VALUES (
+                        v_booking_ids(i),
+                        'CONFIRMED',
+                        'SYSTEM',
+                        'Đã xác nhận đặt phòng'
+                    );
+                END IF;
+
+            END IF;
+        END LOOP;
+
+        -- Reset collection sau mỗi statement
+        v_booking_ids.DELETE;
+        v_count := 0;
+    END AFTER STATEMENT;
+
+END trg_payment_confirm_booking;
+/
+
+-- Tính total_price
+
+CREATE OR REPLACE TRIGGER trg_total_price
+BEFORE INSERT OR UPDATE ON bookings
+FOR EACH ROW
+BEGIN
+    :NEW.total_price := GREATEST(:NEW.raw_price - :NEW.discount_amount, 0);
 END;
 /

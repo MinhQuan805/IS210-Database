@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.time.LocalDateTime;
 
@@ -38,7 +38,6 @@ public class Policy {
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public enum PolicyType {

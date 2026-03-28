@@ -1,5 +1,7 @@
 package dev.uit.project.service;
 
+import dev.uit.project.domain.Booking;
+import dev.uit.project.domain.BookingPromotion;
 import dev.uit.project.domain.DailyPrice;
 import dev.uit.project.domain.Promotion;
 import dev.uit.project.domain.RoomType;
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -24,15 +27,16 @@ public class PricingService {
     private final DailyPriceRepository dailyPriceRepository;
     private final PromotionRepository promotionRepository;
     private final RoomTypeRepository roomTypeRepository;
+    private final BookingRepository bookingRepository;
 
-    public PricingService(SeasonalPriceRepository seasonalPriceRepository,
-                          DailyPriceRepository dailyPriceRepository,
-                          PromotionRepository promotionRepository,
-                          RoomTypeRepository roomTypeRepository) {
+    public PricingService(SeasonalPriceRepository seasonalPriceRepository, DailyPriceRepository dailyPriceRepository,
+            PromotionRepository promotionRepository, RoomTypeRepository roomTypeRepository,
+            BookingRepository bookingRepository) {
         this.seasonalPriceRepository = seasonalPriceRepository;
         this.dailyPriceRepository = dailyPriceRepository;
         this.promotionRepository = promotionRepository;
         this.roomTypeRepository = roomTypeRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     // Seasonal Pricing
@@ -221,5 +225,17 @@ public class PricingService {
         }
 
         return total;
+    }
+
+    @Transactional
+    public BigDecimal getDiscountAmount(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        List<Promotion> bookingPromotions = booking.getPromotions();
+
+        return bookingPromotions.stream()
+            .map(Promotion::getDiscountValue)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

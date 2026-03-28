@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,15 +76,15 @@ public class RoomController {
 
     @GetMapping("/rooms/availability")
     public ResponseEntity<List<RoomDTO>> getAvailableRooms(
-            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkInDate,
-            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkOutDate) {
+            @RequestParam LocalDate checkInDate,
+            @RequestParam LocalDate checkOutDate) {
         return ResponseEntity.ok(roomService.getAvailableRooms(checkInDate, checkOutDate));
     }
 
     @GetMapping("/rooms/availability/detail")
     public ResponseEntity<List<RoomDetailDTO>> getAvailableRoomDetail(
-            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkInDate,
-            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate checkOutDate,
+            @RequestParam LocalDate checkInDate,
+            @RequestParam LocalDate checkOutDate,
             @RequestParam Integer capacity
         ) {
         return ResponseEntity.ok(roomDetailService.getAvailableRoomDetails(checkInDate, checkOutDate, capacity));

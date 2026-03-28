@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import dev.uit.project.domain.Booking.BookingStatus;
 
@@ -12,9 +12,7 @@ public class BookingDetailDTO {
     private Long id;
     private String customerName;
     private String customerEmail;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkInDate;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkOutDate;
     private BigDecimal totalPrice;
     private BigDecimal rawPrice;

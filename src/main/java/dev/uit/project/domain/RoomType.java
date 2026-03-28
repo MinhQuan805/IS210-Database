@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -57,12 +57,10 @@ public class RoomType {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public RoomType() {

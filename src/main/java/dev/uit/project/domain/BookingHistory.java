@@ -3,7 +3,7 @@ package dev.uit.project.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.time.LocalDateTime;
 
@@ -21,18 +21,33 @@ public class BookingHistory {
     private Booking booking;
 
     @Column(nullable = false, length = 50)
-    private String action;
+    @Enumerated(EnumType.STRING)
+    private BookingAction action;
 
     @Column(name = "performed_by", length = 100)
-    private String performedBy;
+    @Enumerated(EnumType.STRING)
+    private BookingActor performedBy;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime timestamp;
 
     @Column(length = 500)
     private String notes;
+
+    public enum BookingAction {
+        CREATED,
+        CONFIRMED,
+        CANCELLED,
+        UPDATED
+    }
+
+    public enum BookingActor {
+        SYSTEM,
+        ADMIN,
+        CUSTOMER
+    }
+
 
     public BookingHistory() {
     }
@@ -53,19 +68,19 @@ public class BookingHistory {
         this.booking = booking;
     }
 
-    public String getAction() {
+    public BookingAction getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(BookingAction action) {
         this.action = action;
     }
 
-    public String getPerformedBy() {
+    public BookingActor getPerformedBy() {
         return performedBy;
     }
 
-    public void setPerformedBy(String performedBy) {
+    public void setPerformedBy(BookingActor performedBy) {
         this.performedBy = performedBy;
     }
 

@@ -5,7 +5,7 @@ import dev.uit.project.domain.Customer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class CustomerDTO {
     private Long id;
@@ -19,9 +19,7 @@ public class CustomerDTO {
     private String address;
     private String notes;
     private Integer isVIP;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public CustomerDTO() {

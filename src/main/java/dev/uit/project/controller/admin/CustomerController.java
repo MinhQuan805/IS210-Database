@@ -44,6 +44,16 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
+    @GetMapping("/byemail/{email}")
+    public ResponseEntity<CustomerDTO> getCustomerByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(customerService.getCustomerByEmail(email));
+    }
+
+    @GetMapping("/exists/{email}")
+    public ResponseEntity<Boolean> existsByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(customerService.existsByEmail(email));
+    }
+
     @PostMapping
     public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
         return ResponseEntity.ok(customerService.createCustomer(request));

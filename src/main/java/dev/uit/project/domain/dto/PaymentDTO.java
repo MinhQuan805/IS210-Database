@@ -3,7 +3,7 @@ package dev.uit.project.domain.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import dev.uit.project.domain.Payment;
 import dev.uit.project.domain.Payment.PaymentStatus;
@@ -11,7 +11,6 @@ import dev.uit.project.domain.Payment.PaymentStatus;
 public class PaymentDTO {
     private Long id;
     private BigDecimal amount;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime paymentDate;
     private PaymentStatus status;
 

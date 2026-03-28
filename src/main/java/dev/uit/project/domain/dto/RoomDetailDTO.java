@@ -6,6 +6,7 @@ import java.util.List;
 import dev.uit.project.domain.Amenity;
 
 public class RoomDetailDTO {
+    private Long id;
     private String roomTypeName;
     private String roomTypeDescription;
     private String roomNumber;
@@ -18,9 +19,9 @@ public class RoomDetailDTO {
     public RoomDetailDTO() {
     }
 
-    
-    public RoomDetailDTO(String roomTypeName, String roomTypeDescription, String roomNumber, Integer floor,
+    public RoomDetailDTO(Long id, String roomTypeName, String roomTypeDescription, String roomNumber, Integer floor,
             String notes, List<Amenity> amenities, BigDecimal rawPrice, Integer capacity) {
+        this.id = id;
         this.roomTypeName = roomTypeName;
         this.roomTypeDescription = roomTypeDescription;
         this.roomNumber = roomNumber;
@@ -93,6 +94,14 @@ public class RoomDetailDTO {
 
     public void setRoomTypeDescription(String roomTypeDescription) {
         this.roomTypeDescription = roomTypeDescription;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

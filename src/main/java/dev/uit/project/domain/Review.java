@@ -3,7 +3,7 @@ package dev.uit.project.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,7 +34,6 @@ public class Review {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @ElementCollection

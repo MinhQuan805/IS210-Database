@@ -2,7 +2,7 @@ package dev.uit.project.domain.dto;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import dev.uit.project.domain.Faq;
 
@@ -11,9 +11,7 @@ public class FaqDTO {
     private String question;
     private String answer;
     private Integer isActive;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public FaqDTO(Long id, String question, String answer, Integer isActive, LocalDateTime createdAt,

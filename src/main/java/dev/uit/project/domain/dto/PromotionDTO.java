@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class PromotionDTO {
     private Long id;
@@ -14,16 +14,12 @@ public class PromotionDTO {
     private String description;
     private Promotion.DiscountType discountType;
     private BigDecimal discountValue;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate startDate;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
     private Integer minNights;
     private Integer maxUses;
     private Integer usedCount;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public PromotionDTO() {

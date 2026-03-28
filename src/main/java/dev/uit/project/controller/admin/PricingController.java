@@ -3,7 +3,7 @@ package dev.uit.project.controller.admin;
 import dev.uit.project.domain.dto.*;
 import dev.uit.project.service.PricingService;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,8 +53,8 @@ public class PricingController {
     @GetMapping("/pricing/daily")
     public ResponseEntity<List<DailyPriceDTO>> getDailyPrices(
             @RequestParam(required = false) Long roomTypeId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
         return ResponseEntity.ok(pricingService.getDailyPrices(roomTypeId, startDate, endDate));
     }
 

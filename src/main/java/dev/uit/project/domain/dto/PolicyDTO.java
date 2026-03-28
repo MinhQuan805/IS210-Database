@@ -4,7 +4,7 @@ import dev.uit.project.domain.Policy;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class PolicyDTO {
     private Long id;
@@ -13,7 +13,6 @@ public class PolicyDTO {
     private String content;
     private String language;
     private Integer version;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public PolicyDTO() {

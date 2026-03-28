@@ -1,6 +1,8 @@
 package dev.uit.project.service;
 
 import dev.uit.project.domain.*;
+import dev.uit.project.domain.BookingHistory.BookingAction;
+import dev.uit.project.domain.BookingHistory.BookingActor;
 import dev.uit.project.domain.dto.*;
 import dev.uit.project.repository.*;
 import org.springframework.data.domain.Page;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,16 +24,18 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final AmenityRepository amenityRepository;
+    private final PricingService pricingService;
 
     public BookingService(BookingRepository bookingRepository, BookingHistoryRepository bookingHistoryRepository,
             CustomerRepository customerRepository, RoomRepository roomRepository, RoomTypeRepository roomTypeRepository,
-            AmenityRepository amenityRepository) {
+            AmenityRepository amenityRepository, PricingService pricingService) {
         this.bookingRepository = bookingRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.customerRepository = customerRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.amenityRepository = amenityRepository;
+        this.pricingService = pricingService;
     }
 
     @Transactional(readOnly = true)
@@ -63,28 +68,31 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingDTO createBooking(CreateBookingRequest request) {
+    public BookingDTO createBooking(CreateBookingRequest request, BookingActor performedBy) {
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
+        
         Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setRoom(room);
         booking.setCheckInDate(request.getCheckInDate());
         booking.setCheckOutDate(request.getCheckOutDate());
-        booking.setTotalPrice(request.getTotalPrice());
+        booking.setRawPrice(pricingService.getRawPrice(room.getRoomType().getId(), request.getCheckInDate(), request.getCheckOutDate()));
+        booking.setTotalPrice(BigDecimal.ZERO); // Để tạm, trigger tính lại sau
+        booking.setDiscountAmount(BigDecimal.ZERO); // Để tạm, trigger tính lại sau
         booking.setStatus(Booking.BookingStatus.PENDING);
         booking.setSpecialRequests(request.getSpecialRequests());
 
         Booking saved = bookingRepository.save(booking);
-        addHistory(saved, "CREATED", "system", "Booking created");
+        addHistory(saved, BookingAction.CREATED, performedBy, "Đã đặt phòng");
 
         return BookingDTO.fromEntity(saved);
     }
 
     @Transactional
-    public BookingDTO confirmBooking(Long id) {
+    public BookingDTO confirmBooking(Long id, BookingActor performedBy) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
@@ -94,13 +102,13 @@ public class BookingService {
 
         booking.setStatus(Booking.BookingStatus.CONFIRMED);
         Booking saved = bookingRepository.save(booking);
-        addHistory(saved, "CONFIRMED", "admin", "Booking confirmed");
+        addHistory(saved, BookingAction.CONFIRMED, performedBy, "Đã xác nhận đặt phòng");
 
         return BookingDTO.fromEntity(saved);
     }
 
     @Transactional
-    public BookingDTO cancelBooking(Long id, String reason) {
+    public BookingDTO cancelBooking(Long id, String reason, BookingActor performedBy) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
@@ -111,7 +119,7 @@ public class BookingService {
 
         booking.setStatus(Booking.BookingStatus.CANCELLED);
         Booking saved = bookingRepository.save(booking);
-        addHistory(saved, "CANCELLED", "admin", reason != null ? reason : "Booking cancelled");
+        addHistory(saved, BookingAction.CANCELLED, performedBy, reason != null ? reason : "Đã hủy đặt phòng");
 
         // Set room back to available
         Room room = booking.getRoom();
@@ -124,7 +132,7 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingDTO updateBooking(Long id, UpdateBookingRequest request) {
+    public BookingDTO updateBooking(Long id, UpdateBookingRequest request, BookingActor performedBy) {
         Booking booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
 
@@ -139,7 +147,7 @@ public class BookingService {
         if (request.getSpecialRequests() != null) booking.setSpecialRequests(request.getSpecialRequests());
 
         Booking saved = bookingRepository.save(booking);
-        addHistory(saved, "UPDATED", "admin", "Booking details updated");
+        addHistory(saved, BookingAction.UPDATED, performedBy, "Đã cập nhật thông tin đặt phòng");
 
         return BookingDTO.fromEntity(saved);
     }
@@ -150,7 +158,7 @@ public class BookingService {
                 .stream().map(BookingHistoryDTO::fromEntity).toList();
     }
 
-    private void addHistory(Booking booking, String action, String performedBy, String notes) {
+    private void addHistory(Booking booking, BookingAction action, BookingActor performedBy, String notes) {
         BookingHistory history = new BookingHistory();
         history.setBooking(booking);
         history.setAction(action);

@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class RoomTypeDTO {
     private Long id;
@@ -17,9 +17,7 @@ public class RoomTypeDTO {
     private BigDecimal basePrice;
     private List<String> images;
     private List<Amenity> amenities;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public RoomTypeDTO() {

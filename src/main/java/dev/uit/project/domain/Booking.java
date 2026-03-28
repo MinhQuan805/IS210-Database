@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -31,12 +31,10 @@ public class Booking {
 
     @NotNull
     @Column(name = "check_in_date", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkInDate;
 
     @NotNull
     @Column(name = "check_out_date", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkOutDate;
 
     @NotNull
@@ -49,7 +47,7 @@ public class Booking {
 
     @NotNull
     @Column(name = "discount_amount", nullable = false, precision = 12, scale = 2)
-    private BigDecimal discountAmount;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -73,7 +71,6 @@ public class Booking {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     public enum BookingStatus {

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
+
+
 public class CreateCustomerRequest {
 
     @NotBlank(message = "First name is required")

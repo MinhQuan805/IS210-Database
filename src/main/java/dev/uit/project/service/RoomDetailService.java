@@ -32,6 +32,7 @@ public class RoomDetailService {
                 RoomTypeDTO roomTypeDTO = roomService.getRoomTypeByRoomId(roomDTO.getId());
 
                 return new RoomDetailDTO(
+                    roomDTO.getId(),
                     roomDTO.getRoomTypeName(),
                     roomTypeDTO.getDescription(),
                     roomDTO.getRoomNumber(),

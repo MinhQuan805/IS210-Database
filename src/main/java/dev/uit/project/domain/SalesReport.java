@@ -3,7 +3,7 @@ package dev.uit.project.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
@@ -36,6 +36,5 @@ public class SalesReport {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 }

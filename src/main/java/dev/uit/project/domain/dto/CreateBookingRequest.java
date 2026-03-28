@@ -2,7 +2,6 @@ package dev.uit.project.domain.dto;
 
 import jakarta.validation.constraints.NotNull;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class CreateBookingRequest {
@@ -19,8 +18,8 @@ public class CreateBookingRequest {
     @NotNull(message = "Check-out date is required")
     private LocalDate checkOutDate;
 
-    @NotNull(message = "Total price is required")
-    private BigDecimal totalPrice;
+    // @NotNull(message = "Total price is required")
+    // private BigDecimal totalPrice;
 
     private String specialRequests;
 
@@ -32,8 +31,8 @@ public class CreateBookingRequest {
     public void setCheckInDate(LocalDate checkInDate) { this.checkInDate = checkInDate; }
     public LocalDate getCheckOutDate() { return checkOutDate; }
     public void setCheckOutDate(LocalDate checkOutDate) { this.checkOutDate = checkOutDate; }
-    public BigDecimal getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
+    // public BigDecimal getTotalPrice() { return totalPrice; }
+    // public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
     public String getSpecialRequests() { return specialRequests; }
     public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
 }

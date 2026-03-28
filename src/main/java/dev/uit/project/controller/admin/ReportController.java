@@ -1,7 +1,7 @@
 package dev.uit.project.controller.admin;
 
 import dev.uit.project.service.ReportService;
-import org.springframework.format.annotation.DateTimeFormat;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,23 +23,23 @@ public class ReportController {
 
     @GetMapping("/revenue")
     public ResponseEntity<Map<String, Object>> getRevenueReport(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate,
             @RequestParam(defaultValue = "MONTH") String groupBy) {
         return ResponseEntity.ok(reportService.getRevenueReport(startDate, endDate, groupBy));
     }
 
     @GetMapping("/occupancy")
     public ResponseEntity<Map<String, Object>> getOccupancyReport(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
         return ResponseEntity.ok(reportService.getOccupancyReport(startDate, endDate));
     }
 
     @GetMapping("/booking-trends")
     public ResponseEntity<Map<String, Object>> getBookingTrends(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
         return ResponseEntity.ok(reportService.getBookingTrends(startDate, endDate));
     }
 
@@ -57,8 +57,8 @@ public class ReportController {
 
     @GetMapping("/trends")
     public ResponseEntity<List<Map<String, Object>>> getTrends(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
         Map<String, Object> result = reportService.getBookingTrends(startDate, endDate);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> trends = (List<Map<String, Object>>) result.get("trends");
@@ -79,15 +79,15 @@ public class ReportController {
 
     @GetMapping("/occupancy-today")
     public ResponseEntity<Map<String, Object>> getOccupancyToday(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam(required = false) LocalDate date) {
         LocalDate targetDate = date != null ? date : LocalDate.now();
         return ResponseEntity.ok(reportService.getDetailedOccupancy(targetDate));
     }
 
     @GetMapping("/total-revenue")
     public ResponseEntity<BigDecimal> getTotalRevenue(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
         return ResponseEntity.ok(reportService.getTotalRevenue(startDate, endDate));
     }
 
@@ -113,8 +113,8 @@ public class ReportController {
 
     @GetMapping("/popular-room-types")
     public ResponseEntity<List<Map<String, Object>>> getPopularRoomTypes(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate) {
         return ResponseEntity.ok(reportService.getPopularRoomTypes(startDate, endDate));
     }
 }

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import dev.uit.project.domain.Review;
 import dev.uit.project.domain.Review.ReviewStatus;
@@ -16,7 +16,6 @@ public class ReviewDTO {
     private BigDecimal rating;
     private String content;
     private Review.ReviewStatus status;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
     private List<String> images;
     

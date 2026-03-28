@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class BookingDTO {
     private Long id;
@@ -21,9 +21,7 @@ public class BookingDTO {
     private Long roomId;
     private String roomNumber;
     private String roomTypeName;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkInDate;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate checkOutDate;
     private BigDecimal totalPrice;
     private BigDecimal rawPrice;
@@ -34,7 +32,6 @@ public class BookingDTO {
     private List<BookingHistory> history;
     private List<Policy> policies;
     private List<Promotion> promotions;
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     public BookingDTO() {

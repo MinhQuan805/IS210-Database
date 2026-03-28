@@ -1,17 +1,18 @@
 package dev.uit.project.domain.dto;
 
 import dev.uit.project.domain.BookingHistory;
+import dev.uit.project.domain.BookingHistory.BookingAction;
+import dev.uit.project.domain.BookingHistory.BookingActor;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 public class BookingHistoryDTO {
     private Long id;
     private Long bookingId;
-    private String action;
-    private String performedBy;
-    @JsonFormat(pattern = "dd-MM-yyyy")
+    private BookingAction action;
+    private BookingActor performedBy;
     private LocalDateTime timestamp;
     private String notes;
 
@@ -33,10 +34,10 @@ public class BookingHistoryDTO {
     public void setId(Long id) { this.id = id; }
     public Long getBookingId() { return bookingId; }
     public void setBookingId(Long bookingId) { this.bookingId = bookingId; }
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
-    public String getPerformedBy() { return performedBy; }
-    public void setPerformedBy(String performedBy) { this.performedBy = performedBy; }
+    public BookingAction getAction() { return action; }
+    public void setAction(BookingAction action) { this.action = action; }
+    public BookingActor getPerformedBy() { return performedBy; }
+    public void setPerformedBy(BookingActor performedBy) { this.performedBy = performedBy; }
     public LocalDateTime getTimestamp() { return timestamp; }
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
     public String getNotes() { return notes; }

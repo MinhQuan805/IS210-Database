@@ -48,6 +48,18 @@ public class CustomerService {
         return CustomerDTO.fromEntity(customer);
     }
 
+    @Transactional(readOnly = true)
+    public CustomerDTO getCustomerByEmail(String email) {
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found with email: " + email));
+        return CustomerDTO.fromEntity(customer);
+    }
+
+    @Transactional(readOnly = true)
+    public Boolean existsByEmail(String email) {
+        return customerRepository.existsByEmail(email);
+    }
+
     @Transactional
     public CustomerDTO createCustomer(CreateCustomerRequest request) {
         if (request.getEmail() != null && customerRepository.existsByEmail(request.getEmail())) {

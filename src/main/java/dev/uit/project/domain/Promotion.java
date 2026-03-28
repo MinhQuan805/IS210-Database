@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,12 +40,10 @@ public class Promotion {
 
     @NotNull
     @Column(name = "start_date", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate startDate;
 
     @NotNull
     @Column(name = "end_date", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate endDate;
 
     @Min(1)
@@ -60,12 +58,10 @@ public class Promotion {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDateTime updatedAt;
 
     public Promotion() {
