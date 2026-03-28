@@ -1,11 +1,5 @@
-import { api } from '@/admin/lib/api'
-import type {
-  Customer,
-  CustomerStats,
-  CustomerBooking,
-  CreateCustomerRequest,
-  CustomerPage
-} from './schema'
+import { api } from '@renderer/admin/lib/api'
+import type { Customer, CustomerStats, CustomerBooking, CreateCustomerRequest } from './schema'
 
 export const customersApi = {
   list: (keyword?: string) => {
@@ -14,6 +8,8 @@ export const customersApi = {
   },
 
   getById: (id: number) => api.get<Customer>(`/admin/customers/${id}`),
+
+  getByEmail: (email: string) => api.get<Customer>(`/admin/customers/byemail/${email}`),
 
   create: (data: CreateCustomerRequest) => api.post<Customer>('/admin/customers', data),
 
@@ -24,5 +20,7 @@ export const customersApi = {
 
   getStats: (id: number) => api.get<CustomerStats>(`/admin/customers/${id}/stats`),
 
-  getBookings: (id: number) => api.get<CustomerBooking[]>(`/admin/customers/${id}/bookings`)
+  getBookings: (id: number) => api.get<CustomerBooking[]>(`/admin/customers/${id}/bookings`),
+
+  exists: (email: string) => api.get<boolean>(`/admin/customers/exists/${email}`)
 }

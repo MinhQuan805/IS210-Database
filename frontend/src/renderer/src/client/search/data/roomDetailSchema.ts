@@ -2,6 +2,7 @@ import { amenitiesSchema } from '@renderer/admin/features/amenities/data/schema'
 import { z } from 'zod'
 
 export const roomDetailSchema = z.object({
+  id: z.number(),
   roomTypeName: z.string(),
   roomTypeDescription: z.string(),
   roomNumber: z.string(),

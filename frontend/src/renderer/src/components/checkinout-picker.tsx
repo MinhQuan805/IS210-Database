@@ -34,8 +34,8 @@ export default function CheckInOutPicker({ defaultValue, onChange }: Props) {
       newErrors.checkOut = 'Hãy chọn ngày check-out'
     }
 
-    if (value.checkIn && value.checkOut && value.checkIn > value.checkOut) {
-      newErrors.checkOut = 'Ngày check-out phải sau hoặc bằng check-in'
+    if (value.checkIn && value.checkOut && value.checkIn >= value.checkOut) {
+      newErrors.checkOut = 'Ngày check-out phải sau check-in'
     }
 
     setErrors(newErrors)

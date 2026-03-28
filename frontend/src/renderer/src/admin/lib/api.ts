@@ -13,6 +13,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     method,
     headers: {
       'Content-Type': 'application/json',
+      'Client-Type': headers['X-Client-Type'] || 'CUSTOMER',
       ...headers
     }
   }
@@ -37,19 +38,59 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 }
 
 export const api = {
-  get: <T>(endpoint: string) => request<T>(endpoint),
-  post: <T>(endpoint: string, body: unknown) => request<T>(endpoint, { method: 'POST', body }),
-  put: <T>(endpoint: string, body: unknown) => request<T>(endpoint, { method: 'PUT', body }),
-  delete: <T>(endpoint: string) => request<T>(endpoint, { method: 'DELETE' }),
-  upload: async <T>(endpoint: string, formData: FormData): Promise<T> => {
+  get: <T>(endpoint: string, headers?: Record<string, string>) => request<T>(endpoint, { headers }),
+
+  post: <T>(endpoint: string, body: unknown, headers?: Record<string, string>) =>
+    request<T>(endpoint, { method: 'POST', body, headers }),
+
+  put: <T>(endpoint: string, body: unknown, headers?: Record<string, string>) =>
+    request<T>(endpoint, { method: 'PUT', body, headers }),
+
+  delete: <T>(endpoint: string, headers?: Record<string, string>) =>
+    request<T>(endpoint, { method: 'DELETE', headers }),
+
+  upload: async <T>(
+    endpoint: string,
+    formData: FormData,
+    headers?: Record<string, string>
+  ): Promise<T> => {
     const response = await fetch(`${API_BASE}${endpoint}`, {
       method: 'POST',
-      body: formData
+      body: formData,
+      headers
     })
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: response.statusText }))
       throw new Error(error.message || `HTTP ${response.status}`)
     }
     return response.json()
+  },
+
+  download: async (endpoint: string, filename = 'file.pdf', headers?: Record<string, string>) => {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Client-Type': 'CUSTOMER',
+        ...headers
+      }
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: response.statusText }))
+      throw new Error(error.message || `HTTP ${response.status}`)
+    }
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+
+    window.URL.revokeObjectURL(url)
   }
 }

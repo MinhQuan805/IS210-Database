@@ -1,4 +1,4 @@
-import { api } from '@/admin/lib/api'
+import { api } from '@renderer/admin/lib/api'
 import type { Policy, PolicyType, CreatePolicyRequest } from './schema'
 
 export const policiesApi = {

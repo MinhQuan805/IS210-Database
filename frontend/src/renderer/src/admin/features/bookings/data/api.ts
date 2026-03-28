@@ -1,4 +1,4 @@
-import { api } from '@/admin/lib/api'
+import { api } from '@renderer/admin/lib/api'
 import type { Booking, BookingHistory, BookingStatus, CreateBookingRequest } from './schema'
 
 export const bookingsApi = {
@@ -11,13 +11,23 @@ export const bookingsApi = {
     return api.get<Booking[]>(`/admin/bookings${qs ? `?${qs}` : ''}`)
   },
   getById: (id: number) => api.get<Booking>(`/admin/bookings/${id}`),
-  create: (data: CreateBookingRequest) => api.post<Booking>('/admin/bookings', data),
+
+  create: (
+    data: CreateBookingRequest,
+    headers: { 'Client-Type': string } = { 'Client-Type': 'CUSTOMER' }
+  ) => api.post<Booking>('/admin/bookings', data, headers),
+
   update: (id: number, data: CreateBookingRequest) =>
     api.put<Booking>(`/admin/bookings/${id}`, data),
+
   delete: (id: number) => api.delete<void>(`/admin/bookings/${id}`),
+
   confirm: (id: number) => api.put<Booking>(`/admin/bookings/${id}/confirm`, {}),
+
   checkIn: (id: number) => api.put<Booking>(`/admin/bookings/${id}/check-in`, {}),
+
   checkOut: (id: number) => api.put<Booking>(`/admin/bookings/${id}/check-out`, {}),
+
   cancel: (id: number) => api.put<Booking>(`/admin/bookings/${id}/cancel`, {}),
   getHistory: (id: number) => api.get<BookingHistory[]>(`/admin/bookings/${id}/history`)
 }

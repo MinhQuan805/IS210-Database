@@ -1,4 +1,4 @@
-import { api } from '@/admin/lib/api'
+import { api } from '@renderer/admin/lib/api'
 import { Review } from '@renderer/admin/features/reviews/data/schema'
 
 export const reviewsApi = {

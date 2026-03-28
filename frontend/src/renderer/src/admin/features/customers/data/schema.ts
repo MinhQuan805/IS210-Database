@@ -55,13 +55,13 @@ export type CustomerBooking = z.infer<typeof customerBookingSchema>
 export const createCustomerSchema = z.object({
   firstName: z.string().min(1, 'Họ là bắt buộc.'),
   lastName: z.string().min(1, 'Tên là bắt buộc.'),
-  email: z.email('Email không hợp lệ.').or(z.literal('')).optional().default(''),
-  phone: z.string().optional().default(''),
-  idNumber: z.string().optional().default(''),
-  nationality: z.string().optional().default(''),
-  dateOfBirth: z.string().optional().default(''),
-  address: z.string().optional().default(''),
-  notes: z.string().optional().default(''),
-  isVIP: z.boolean().optional().default(false)
+  email: z.email('Email không hợp lệ.'),
+  phone: z.string(),
+  idNumber: z.string(),
+  nationality: z.string(),
+  dateOfBirth: z.string(),
+  address: z.string(),
+  notes: z.string(),
+  isVIP: z.boolean()
 })
 export type CreateCustomerRequest = z.infer<typeof createCustomerSchema>

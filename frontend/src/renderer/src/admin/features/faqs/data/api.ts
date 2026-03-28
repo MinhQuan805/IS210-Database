@@ -1,4 +1,4 @@
-import { api } from '@/admin/lib/api'
+import { api } from '@renderer/admin/lib/api'
 import { Faq } from '@renderer/admin/features/faqs/data/schema'
 
 export const faqsApi = {

@@ -1,4 +1,4 @@
-import { api } from '@/admin/lib/api'
+import { api } from '@renderer/admin/lib/api'
 import { BookingDetail } from '@renderer/client/bookingDetails/data/schema'
 
 export const bookingDetailApi = {

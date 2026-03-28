@@ -1,6 +1,6 @@
-import { Search } from 'lucide-react'
+import { Ban, Search } from 'lucide-react'
 
-import { format } from 'date-fns'
+import { addDays, format } from 'date-fns'
 
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -20,13 +20,12 @@ import { toast } from 'sonner'
 import { RoomDetail } from '@renderer/client/search/data/roomDetailSchema'
 import RoomCard from '@renderer/client/search/components/RoomCard'
 import { roomDetailApi } from '@renderer/client/search/data/roomDetailApi'
-import { DatePicker } from '@renderer/components/ui/date-picker'
 import CheckInOutPicker from '@renderer/components/checkinout-picker'
 
 const formSchema = z.object({
   checkInDate: z.date(),
   checkOutDate: z.date(),
-  capacity: z.number('Dữ liệu không hợp lệ').min(0, 'Dữ liệu không hợp lệ')
+  capacity: z.number('Dữ liệu không hợp lệ').min(1, 'Dữ liệu không hợp lệ')
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -39,7 +38,7 @@ export default function BookingDetailPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       checkInDate: new Date(),
-      checkOutDate: new Date(),
+      checkOutDate: addDays(new Date(), 1),
       capacity: 4
     }
   })
@@ -50,8 +49,8 @@ export default function BookingDetailPage() {
       setRooms(null)
 
       const data = await roomDetailApi.list({
-        checkInDate: format(formVals.checkInDate, 'dd-MM-yyyy'),
-        checkOutDate: format(formVals.checkOutDate, 'dd-MM-yyyy'),
+        checkInDate: format(formVals.checkInDate, 'yyyy-MM-dd'),
+        checkOutDate: format(formVals.checkOutDate, 'yyyy-MM-dd'),
         capacity: formVals.capacity
       })
 
@@ -91,15 +90,17 @@ export default function BookingDetailPage() {
                 valueAsNumber: true
               })}
             ></Input>
-            {form.formState.errors.capacity && (
-              <span className="text-red-500 text-sm">{form.formState.errors.capacity.message}</span>
-            )}
           </div>
 
           <Button type="submit" className="flex items-center gap-1">
             Tìm phòng <Search className="w-4 h-4" />
           </Button>
         </form>
+        <div>
+          {form.formState.errors.capacity && (
+            <span className="text-red-500 text-sm">{form.formState.errors.capacity.message}</span>
+          )}
+        </div>
       </div>
       {loading ? (
         <Card className="w-full">
@@ -112,7 +113,26 @@ export default function BookingDetailPage() {
           </CardContent>
         </Card>
       ) : (
-        rooms && <RoomCard rooms={rooms} />
+        <>
+          {rooms && (
+            <>
+              {rooms.length ? (
+                <RoomCard
+                  rooms={rooms}
+                  checkInDate={form.getValues().checkInDate}
+                  checkOutDate={form.getValues().checkOutDate}
+                />
+              ) : (
+                <div className="size-full flex flex-col items-center justify-center gap-2">
+                  <Ban className="size-20 text-muted-foreground" />
+                  <p className="text-xl text-muted-foreground w-1/2 text-center">
+                    Hiện không có loại phòng này, hãy thử lại sau...
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
     </div>
   )
