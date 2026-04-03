@@ -21,6 +21,8 @@ CREATE SEQUENCE blog_categories_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE blog_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE review_seq START WITH 1 INCREMENT BY 1;
 CREATE SEQUENCE sales_reports_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE chat_conversation_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE chat_message_seq START WITH 1 INCREMENT BY 1;
 
 -- Bảng amenities
 CREATE TABLE amenities (
@@ -267,4 +269,31 @@ CREATE TABLE sales_reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+CREATE TABLE chat_conversations (
+    id NUMBER DEFAULT chat_conversation_seq.NEXTVAL PRIMARY KEY,
+    user1_id NUMBER NOT NULL,
+    user2_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_chat_conv_user1 FOREIGN KEY (user1_id) REFERENCES users(id),
+    CONSTRAINT fk_chat_conv_user2 FOREIGN KEY (user2_id) REFERENCES users(id),
+    CONSTRAINT ck_chat_conv_distinct_users CHECK (user1_id <> user2_id),
+    CONSTRAINT ck_chat_conv_order CHECK (user1_id < user2_id),
+    CONSTRAINT uk_chat_conv_user_pair UNIQUE (user1_id, user2_id)
+);
 
+CREATE TABLE chat_messages (
+    id NUMBER DEFAULT chat_message_seq.NEXTVAL PRIMARY KEY,
+    chat_conversation_id NUMBER NOT NULL,
+    sender_id NUMBER NOT NULL,
+    recipient_id NUMBER NOT NULL,
+    content CLOB NOT NULL,
+    is_read NUMBER(1) DEFAULT 0 NOT NULL,
+    read_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT fk_chat_msg_conversation FOREIGN KEY (chat_conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
+    CONSTRAINT fk_chat_msg_sender FOREIGN KEY (sender_id) REFERENCES users(id),
+    CONSTRAINT fk_chat_msg_recipient FOREIGN KEY (recipient_id) REFERENCES users(id),
+    CONSTRAINT ck_chat_msg_distinct_users CHECK (sender_id <> recipient_id),
+    CONSTRAINT ck_chat_msg_is_read CHECK (is_read IN (0, 1))
+);

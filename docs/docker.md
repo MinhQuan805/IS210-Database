@@ -30,7 +30,7 @@ Lưu ý:
 ### Tạo và chạy container
 
 ```sh
-docker run --name hotel-db -p 1521:1521 -e ORACLE_PASSWORD=Admin123 -v hotel-data:/opt/oracle/oradata -v "D:/UNI DOCS/Hotel/docker/initdb":/docker-entrypoint-initdb.d --health-cmd="healthcheck.sh" --health-interval=10s --health-timeout=5s --health-retries=10 gvenzl/oracle-free:23-slim
+docker run --name hotel-db -p 1521:1521 -e ORACLE_PASSWORD=Admin123 -v hotel-data:/opt/oracle/oradata -v "D:/Work/Project Personal/Hotel/docker/initdb":/docker-entrypoint-initdb.d --health-cmd="healthcheck.sh" gvenzl/oracle-free:23-slim
 ```
 
 Database đã khởi tạo xong sẽ thấy thông báo: `DATABASE IS READY TO USE!`.
@@ -45,7 +45,7 @@ docker volume rm hotel-data
 ### Đăng nhập vào database
 
 ```sh
-docker exec -it hotel-db sqlplus hotel/Admin123@//localhost:1521/FREEPDB1
+docker exec -it hotel-db sqlplus hotel/Admin123//localhost:1521/FREEPDB1
 ```
 
 Lệnh test:
