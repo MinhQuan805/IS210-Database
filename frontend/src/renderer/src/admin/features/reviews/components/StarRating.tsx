@@ -17,7 +17,13 @@ function Star({ isFill }: { isFill: boolean }) {
   )
 }
 
-export default function StarRating({ rating, className }: { rating: number; className: string }) {
+export default function StarRating({
+  rating,
+  className = ''
+}: {
+  rating: number
+  className?: string
+}) {
   return (
     <div className={`flex gap-2 ${className}`}>
       <Star isFill={rating >= 1} />
