@@ -103,7 +103,8 @@ export default function BookingsCard({
         <div className="bg-muted/50 p-3 rounded-md text-xs space-y-2">
           {status === 'PENDING' && (
             <p className="text-orange-600 font-medium">
-              ⚠️ Lưu ý: Vui lòng thanh toán trước ngày {checkInDate} để giữ chỗ.
+              ⚠️ Lưu ý: Quý khách lòng thanh toán trước 50% giá trị đặt phòng đến hết ngày{' '}
+              {checkInDate} để giữ chỗ.
             </p>
           )}
           <p>
@@ -132,9 +133,6 @@ export default function BookingsCard({
             </span>
           </div>
         </div>
-
-        {/* Action */}
-        {status == 'PENDING' && <div className="flex items-center justify-center"></div>}
       </CardContent>
     </Card>
   )

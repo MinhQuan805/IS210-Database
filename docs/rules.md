@@ -23,16 +23,17 @@
 
 - Cập nhật `rooms.status` (`trg_booking_room_status`).
 - Cập nhật `bookings.status` thành `CONFIRMED` khi thanh toán đủ, đồng thời ghi nhận vào `booking_history` (`trg_payment_confirm_booking`).
-- Quản lý sử dụng `promotions.used_count` (`trg_bpromo_biu`).
 - Tính `bookings.total_price` (`trg_total_price`).
+- Quản lý sử dụng `promotions.used_count` (`trg_bpromo_biu`).
 
 **Các chức năng được được đảm nhiệm bởi server**:
 
 - CRUD trên các bảng.
 - Xuất PDF phiếu hóa đơn và thông tin đặt phòng (`pdfService`).
 - Tính `raw_price` và `discount_amount` (`pricingSerivce`).
+- Áp dụng các policies cho bookings (tạm áp dụng toàn bộ policies) (`bookingService`).
 
-# Quy trình nghiệp vụ
+# Danh mục tính năng
 
 ## Công thức tính giá đặt phòng
 
@@ -56,6 +57,16 @@ Trong đó:
 
 ## Đối với khách hàng
 
-## Đối với khách hàng đã đăng ký tài khoản
+- Tra cứu những phòng có thể đặt.
+- Tra cứu thông tin đặt phòng, thông tin cá nhân, lịch sử thanh toán.
+- Chỉnh sửa thông tin đặt phòng (nếu còn là `PENDING`), chỉnh sửa thông tin cá nhân.
+- Tạo mới thông tin khách hàng.
+- Đặt phòng.
+- Thanh toán (có thể thanh toán nhiều lần cho 1 booking và có các trạng thái `PENDING`, `SUCCESS`, `FAILED`. Ở trong đồ án này giả sử chỉ thanh toán 1 lần và `SUCCESS`).
+- In phiếu thông tin đặt phòng và hóa đơn thanh toán.
 
-## Đối với quản lý và nhân viên khách sạn
+## Đối với khách hàng đã đăng ký tài khoản (user có role `CLIENT`)
+
+- Xem, thêm, sửa, xóa tài khoản cá nhân và các bài review của họ.
+
+## Đối với quản lý và nhân viên khách sạn (user không phải role `CLIENT`)

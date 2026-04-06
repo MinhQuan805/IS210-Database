@@ -3,8 +3,6 @@ package dev.uit.project.domain.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
-
 import dev.uit.project.domain.Payment;
 import dev.uit.project.domain.Payment.PaymentStatus;
 
@@ -13,17 +11,27 @@ public class PaymentDTO {
     private BigDecimal amount;
     private LocalDateTime paymentDate;
     private PaymentStatus status;
+    private BookingDTO booking;
 
     public PaymentDTO() {
     }
 
+    public PaymentDTO(Long id, BigDecimal amount, LocalDateTime paymentDate, PaymentStatus status, BookingDTO booking) {
+        this.id = id;
+        this.amount = amount;
+        this.paymentDate = paymentDate;
+        this.status = status;
+        this.booking = booking;
+    }
+
     public static PaymentDTO fromEntity(Payment payment) {
-        PaymentDTO dto = new PaymentDTO();
-        dto.setId(payment.getId());
-        dto.setAmount(payment.getAmount());
-        dto.setPaymentDate(payment.getPaymentDate());
-        dto.setStatus(payment.getStatus());
-        return dto;
+        return new PaymentDTO(
+            payment.getId(),
+            payment.getAmount(),
+            payment.getPaymentDate(),
+            payment.getStatus(),
+            BookingDTO.fromEntity(payment.getBooking())
+        );
     }
 
     public Long getId() {
@@ -56,6 +64,14 @@ public class PaymentDTO {
 
     public void setStatus(PaymentStatus status) {
         this.status = status;
+    }
+
+    public BookingDTO getBooking() {
+        return booking;
+    }
+
+    public void setBooking(BookingDTO booking) {
+        this.booking = booking;
     }
 
     

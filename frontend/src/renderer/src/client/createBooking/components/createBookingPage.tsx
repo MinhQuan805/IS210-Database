@@ -2,14 +2,15 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { bookingsApi } from '@renderer/admin/features/bookings/data/api'
 import { Booking } from '@renderer/admin/features/bookings/data/schema'
 import { customersApi } from '@renderer/admin/features/customers/data/api'
-import {
-  CreateCustomerRequest,
-  createCustomerSchema,
-  Customer
-} from '@renderer/admin/features/customers/data/schema'
+import { Customer } from '@renderer/admin/features/customers/data/schema'
 import { pdfApi } from '@renderer/admin/features/pdf/api'
+import { policiesApi } from '@renderer/admin/features/policies/data/api'
+import { Policy } from '@renderer/admin/features/policies/data/schema'
+import { PoliciesDialog } from '@renderer/client/createBooking/components/PoliciesDialog'
+import { createBookingSchema, CreateBooking } from '@renderer/client/createBooking/data/schema'
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -55,32 +56,50 @@ export default function CreateBookingPage({
   checkInDate,
   checkOutDate
 }: CreateBookingPageProps) {
-  const form = useForm<CreateCustomerRequest>({
-    resolver: zodResolver(createCustomerSchema),
+  const form = useForm<CreateBooking>({
+    resolver: zodResolver(createBookingSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      idNumber: '',
-      nationality: '',
-      dateOfBirth: '',
-      address: '',
-      notes: '',
-      isVIP: false
+      customer: {
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        idNumber: '',
+        nationality: '',
+        dateOfBirth: '',
+        address: '',
+        notes: '',
+        isVIP: false
+      },
+      specialRequests: '',
+      isAcceptPolicies: false
     }
   })
 
-  const [specialRequests, setSpecialRequests] = useState<string>('')
+  const [policies, setPolicies] = useState<Policy[] | null>(null)
 
   const [openConfirmBox, setOpenConfirmBox] = useState<boolean>(false)
 
   const [customer, setCustomer] = useState<Customer | undefined>(undefined)
 
-  async function handleConfirmInfo(data: CreateCustomerRequest) {
+  // Lấy policies
+  useEffect(() => {
+    async function fetchPolicies() {
+      try {
+        const data = await policiesApi.list()
+        setPolicies(data)
+      } catch (err) {
+        console.log('Failed to fetch policies: ', err)
+        toast.error('Lỗi! Hãy thử lại sau.')
+      }
+    }
+    fetchPolicies()
+  }, [])
+
+  async function handleConfirmInfo(data: CreateBooking) {
     try {
       toast.info('Đang kiểm tra thông tin ...')
-      const isExists = await customersApi.exists(data.email)
+      const isExists = await customersApi.exists(data.customer.email)
 
       if (!isExists) handleCreateCustomer()
       else setOpenConfirmBox(isExists)
@@ -93,7 +112,7 @@ export default function CreateBookingPage({
   async function handleGetExistingCustomer() {
     try {
       toast.info('Đang tìm thông tin khách hàng ...')
-      const customer = await customersApi.getByEmail(form.getValues().email)
+      const customer = await customersApi.getByEmail(form.getValues().customer.email)
       setCustomer(customer)
     } catch (err) {
       toast.error('Lỗi! Hãy thử lại sau.')
@@ -104,7 +123,7 @@ export default function CreateBookingPage({
   async function handleCreateCustomer() {
     try {
       toast.info('Đang lưu thông tin khách hàng ...')
-      const customer = await customersApi.create(form.getValues())
+      const customer = await customersApi.create(form.getValues().customer)
       setCustomer(customer)
     } catch (err) {
       toast.error('Lưu thông tin thất bại! Hãy thử lại sau.')
@@ -112,27 +131,21 @@ export default function CreateBookingPage({
     }
   }
 
+  // Booking khi xác định đc customers
+
   useEffect(() => {
     async function handleCreateBooking() {
       try {
-        if (!customer) return
+        if (!customer || !policies) return
 
         toast.info('Đang đặt phòng ...')
-
-        console.log({
-          customerId: customer.id,
-          roomId,
-          checkInDate: format(checkInDate, 'yyyy-MM-dd'),
-          checkOutDate: format(checkOutDate, 'yyyy-MM-dd'),
-          specialRequests
-        })
 
         const booking = await bookingsApi.create({
           customerId: customer.id,
           roomId,
           checkInDate: format(checkInDate, 'yyyy-MM-dd'),
           checkOutDate: format(checkOutDate, 'yyyy-MM-dd'),
-          specialRequests
+          specialRequests: form.getValues().specialRequests
         })
 
         onOpenChange(false)
@@ -146,7 +159,7 @@ export default function CreateBookingPage({
     }
 
     handleCreateBooking()
-  }, [customer])
+  }, [customer, policies])
 
   return (
     <>
@@ -170,7 +183,7 @@ export default function CreateBookingPage({
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="firstName"
+                  name="customer.firstName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -185,7 +198,7 @@ export default function CreateBookingPage({
                 />
                 <FormField
                   control={form.control}
-                  name="lastName"
+                  name="customer.lastName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
@@ -200,11 +213,11 @@ export default function CreateBookingPage({
                 />
               </div>
 
-              {/* Hàng 2: Email và Số điện thoại */}
+              {/* Hàng 2: Email và SĐT */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="customer.email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -219,7 +232,7 @@ export default function CreateBookingPage({
                 />
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="customer.phone"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -234,11 +247,11 @@ export default function CreateBookingPage({
                 />
               </div>
 
-              {/* Hàng 3: CMND/CCCD và Quốc tịch */}
+              {/* Hàng 3: CMND và Quốc tịch */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="idNumber"
+                  name="customer.idNumber"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -253,7 +266,7 @@ export default function CreateBookingPage({
                 />
                 <FormField
                   control={form.control}
-                  name="nationality"
+                  name="customer.nationality"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -272,7 +285,7 @@ export default function CreateBookingPage({
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="dateOfBirth"
+                  name="customer.dateOfBirth"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -287,7 +300,7 @@ export default function CreateBookingPage({
                 />
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="customer.address"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
@@ -302,14 +315,39 @@ export default function CreateBookingPage({
                 />
               </div>
 
-              <Textarea
-                placeholder="Yêu cầu đặc biệt ..."
-                value={specialRequests}
-                onChange={(e) => setSpecialRequests(e.target.value)}
+              {/* Special Requests — đưa vào FormField để validation hoạt động */}
+              <FormField
+                control={form.control}
+                name="specialRequests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Textarea placeholder="Yêu cầu đặc biệt ..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Button type="submit" variant="outline" className="flex-1">
+              <FormField
+                control={form.control}
+                name="isAcceptPolicies"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <FormControl>
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                      <FormLabel>Tôi đồng ý với các chính sách của khách sạn</FormLabel>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex flex-col gap-2">
+                {policies && <PoliciesDialog policies={policies} />}
+                <Button type="submit" className="flex-1">
                   ĐẶT PHÒNG NGAY!
                 </Button>
               </div>

@@ -8,7 +8,7 @@ import type { Review } from '@renderer/admin/features/reviews/data/schema'
 
 export default function ReviewCard({ review }: { review: Review }) {
   return (
-    <Card className="w-full pb-1">
+    <Card>
       <CardHeader>
         <CardTitle className="flex flex-col md:flex-row justify-between">
           <UserAvatar

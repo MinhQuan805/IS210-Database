@@ -34,7 +34,7 @@ export default function ImageList({
   return (
     <>
       {/* GRID */}
-      <div className={`grid grid-cols-5 grid-rows-3 gap-2 ${className}`}>
+      <div className={`grid grid-cols-5 gap-2 ${className}`}>
         {visibleImages.map((src, index) => {
           const isLast = index === maxImages - 1 && images.length > maxImages
 
