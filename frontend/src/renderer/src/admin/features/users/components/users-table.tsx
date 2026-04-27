@@ -28,9 +28,10 @@ export function UsersTable() {
   const { users, setOpen, setCurrentRow } = useUsers()
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const usersList = Array.isArray(users) ? users : []
 
   // Filter users based on search
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = usersList.filter((user) => {
     const searchLower = search.toLowerCase()
     return (
       user.username.toLowerCase().includes(searchLower) ||
@@ -44,6 +45,8 @@ export function UsersTable() {
   const totalPages = Math.ceil(filteredUsers.length / PAGE_SIZE)
   const startIndex = (currentPage - 1) * PAGE_SIZE
   const paginatedUsers = filteredUsers.slice(startIndex, startIndex + PAGE_SIZE)
+  const fromIndex = filteredUsers.length === 0 ? 0 : startIndex + 1
+  const toIndex = filteredUsers.length === 0 ? 0 : Math.min(startIndex + PAGE_SIZE, filteredUsers.length)
 
   const handleEdit = (user: User) => {
     setCurrentRow(user)
@@ -164,7 +167,7 @@ export function UsersTable() {
       {/* Pagination */}
       <div className="flex items-center justify-between px-2">
         <div className="text-sm text-muted-foreground">
-          Showing {startIndex + 1} to {Math.min(startIndex + PAGE_SIZE, filteredUsers.length)} of{' '}
+          Showing {fromIndex} to {toIndex} of{' '}
           {filteredUsers.length} users
         </div>
         <div className="flex items-center space-x-2">

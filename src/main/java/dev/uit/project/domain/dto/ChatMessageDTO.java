@@ -10,15 +10,14 @@ public class ChatMessageDTO {
 
     private Long id;
     private Long chatConversationId;
-    private Long senderId;
-    private String senderName;
-    private Long recipientId;
-    private String recipientName;
+    private String senderType; // 'CLIENT' or 'ADMIN'
+    private Long adminId;
+    private String adminName;
     private String content;
     private Integer isRead;
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime readAt;
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
     public ChatMessageDTO() {
@@ -28,10 +27,11 @@ public class ChatMessageDTO {
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setId(message.getId());
         dto.setChatConversationId(message.getChatConversation().getId());
-        dto.setSenderId(message.getSender().getId());
-        dto.setSenderName(message.getSender().getFirstName() + " " + message.getSender().getLastName());
-        dto.setRecipientId(message.getRecipient().getId());
-        dto.setRecipientName(message.getRecipient().getFirstName() + " " + message.getRecipient().getLastName());
+        dto.setSenderType(message.getSenderType());
+        if (message.getAdmin() != null) {
+            dto.setAdminId(message.getAdmin().getId());
+            dto.setAdminName(message.getAdmin().getFirstName() + " " + message.getAdmin().getLastName());
+        }
         dto.setContent(message.getContent());
         dto.setIsRead(message.getIsRead());
         dto.setReadAt(message.getReadAt());
@@ -55,36 +55,28 @@ public class ChatMessageDTO {
         this.chatConversationId = chatConversationId;
     }
 
-    public Long getSenderId() {
-        return senderId;
+    public String getSenderType() {
+        return senderType;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+    public void setSenderType(String senderType) {
+        this.senderType = senderType;
     }
 
-    public String getSenderName() {
-        return senderName;
+    public Long getAdminId() {
+        return adminId;
     }
 
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
+    public void setAdminId(Long adminId) {
+        this.adminId = adminId;
     }
 
-    public Long getRecipientId() {
-        return recipientId;
+    public String getAdminName() {
+        return adminName;
     }
 
-    public void setRecipientId(Long recipientId) {
-        this.recipientId = recipientId;
-    }
-
-    public String getRecipientName() {
-        return recipientName;
-    }
-
-    public void setRecipientName(String recipientName) {
-        this.recipientName = recipientName;
+    public void setAdminName(String adminName) {
+        this.adminName = adminName;
     }
 
     public String getContent() {

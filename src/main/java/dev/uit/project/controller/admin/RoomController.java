@@ -30,6 +30,16 @@ public class RoomController {
         this.roomDetailService = roomDetailService;
     }
 
+    @GetMapping({"/room-types"})
+    public ResponseEntity<List<RoomTypeDTO>> getAllRoomTypes() {
+        return ResponseEntity.ok(roomService.getAllRoomTypes());
+    }
+
+    @GetMapping({"/room-types/{id}"})
+    public ResponseEntity<RoomTypeDTO> getRoomTypeById(@PathVariable Long id) {
+        return ResponseEntity.ok(roomService.getRoomTypeById(id));
+    }
+
     @PostMapping({"/room-types"})
     public ResponseEntity<RoomTypeDTO> createRoomType(@Valid @RequestBody CreateRoomTypeRequest request) {
         return ResponseEntity.ok(roomService.createRoomType(request));

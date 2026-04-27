@@ -28,6 +28,9 @@ const Reports = lazy(() => import('@/admin/features/reports').then((m) => ({ def
 const Content = lazy(() =>
   import('@renderer/admin/features/policies').then((m) => ({ default: m.Content }))
 )
+const Messages = lazy(() =>
+  import('@renderer/admin/features/messages').then((m) => ({ default: m.Messages }))
+)
 const SettingsProfile = lazy(() =>
   import('@/admin/features/settings/profile').then((m) => ({ default: m.SettingsProfile }))
 )
@@ -58,6 +61,7 @@ export type AdminRoute =
   | 'customers'
   | 'reports'
   | 'content'
+  | 'messages'
   | 'settings'
   | 'settings-account'
   | 'settings-appearance'
@@ -197,6 +201,14 @@ export function AdminApp(): React.JSX.Element {
             fallback={<div className="flex items-center justify-center h-64">Loading...</div>}
           >
             <SettingsDisplay />
+          </Suspense>
+        )
+      case 'messages':
+        return (
+          <Suspense
+            fallback={<div className="flex items-center justify-center h-64">Loading...</div>}
+          >
+            <Messages />
           </Suspense>
         )
       case 'dashboard':

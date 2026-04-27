@@ -15,9 +15,7 @@ import {
   CalendarDays,
   CalendarClock,
   Percent,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd
+  MessagesSquare
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
@@ -115,6 +113,11 @@ export const sidebarData: SidebarData = {
           title: 'Người Dùng',
           url: '/users',
           icon: UserCog
+        },
+        {
+          title: 'Nhắn tin',
+          url: '/messages',
+          icon: MessagesSquare
         }
       ]
     },

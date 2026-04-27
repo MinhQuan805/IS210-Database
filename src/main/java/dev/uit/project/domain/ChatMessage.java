@@ -33,13 +33,12 @@ public class ChatMessage {
     @JsonIgnore
     private ChatConversation chatConversation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
+    @Column(name = "sender_type", nullable = false)
+    private String senderType; // 'CLIENT' or 'ADMIN'
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipient_id", nullable = false)
-    private User recipient;
+    @JoinColumn(name = "admin_id")
+    private User admin; // Null if senderType is 'CLIENT'
 
     @Lob
     @Column(columnDefinition = "CLOB", nullable = false)
@@ -76,20 +75,20 @@ public class ChatMessage {
         this.chatConversation = chatConversation;
     }
 
-    public User getSender() {
-        return sender;
+    public String getSenderType() {
+        return senderType;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
+    public void setSenderType(String senderType) {
+        this.senderType = senderType;
     }
 
-    public User getRecipient() {
-        return recipient;
+    public User getAdmin() {
+        return admin;
     }
 
-    public void setRecipient(User recipient) {
-        this.recipient = recipient;
+    public void setAdmin(User admin) {
+        this.admin = admin;
     }
 
     public String getContent() {

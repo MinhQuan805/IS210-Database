@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
 import { type User, type CreateUserRequest, type UpdateUserRequest } from '../data/schema'
 import { toast } from 'sonner'
-import { usersApi } from '../data/api'
+import { usersApi, type UsersListResponse } from '../data/api'
 
 type UsersDialogType = 'add' | 'edit' | 'delete'
 
@@ -32,11 +32,23 @@ export function UsersProvider({ children }: UsersProviderProps) {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
+  const normalizeUsersList = (payload: UsersListResponse | null | undefined): User[] => {
+    if (Array.isArray(payload)) {
+      return payload
+    }
+
+    if (payload && Array.isArray(payload.content)) {
+      return payload.content
+    }
+
+    return []
+  }
+
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
       const data = await usersApi.list()
-      setUsers(data || [])
+      setUsers(normalizeUsersList(data))
     } catch (error) {
       toast.error('Không thể tải danh sách người dùng.')
       console.error('Failed to fetch users:', error)

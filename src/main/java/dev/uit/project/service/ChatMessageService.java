@@ -70,15 +70,18 @@ public class ChatMessageService {
     public ChatMessageDTO saveMessage(ChatMessageDTO request) {
         ChatConversation conversation = chatConversationRepository.findById(request.getChatConversationId())
                 .orElseThrow(() -> new RuntimeException("Chat conversation not found"));
-        User sender = userRepository.findById(request.getSenderId())
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
-        User recipient = userRepository.findById(request.getRecipientId())
-                .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
         ChatMessage newMessage = new ChatMessage();
         newMessage.setChatConversation(conversation);
-        newMessage.setSender(sender);
-        newMessage.setRecipient(recipient);
+        newMessage.setSenderType(request.getSenderType());
+        
+        if ("ADMIN".equals(request.getSenderType())) {
+            if (request.getAdminId() != null) {
+                User admin = userRepository.findById(request.getAdminId())
+                        .orElseThrow(() -> new RuntimeException("Admin not found"));
+                newMessage.setAdmin(admin);
+            }
+        }
         newMessage.setContent(request.getContent());
         return ChatMessageDTO.fromEntity(chatMessageRepository.save(newMessage));
     }
@@ -95,13 +98,15 @@ public class ChatMessageService {
     }
 
     @Transactional
-    public List<ChatMessageDTO> markConversationAsRead(Long chatConversationId, Long readerId) {
-        if (chatConversationId == null || readerId == null) {
-            throw new RuntimeException("Chat conversation id and reader id are required");
+    public List<ChatMessageDTO> markConversationAsRead(Long chatConversationId, String readerType) {
+        if (chatConversationId == null || readerType == null) {
+            throw new RuntimeException("Chat conversation id and reader type are required");
         }
 
+        String targetSenderType = "CLIENT".equals(readerType) ? "ADMIN" : "CLIENT";
+
         List<ChatMessage> messages = chatMessageRepository
-                .findByChatConversationIdAndRecipientIdAndIsReadOrderByCreatedAtAsc(chatConversationId, readerId, UNREAD);
+                .findByChatConversationIdAndSenderTypeAndIsReadOrderByCreatedAtAsc(chatConversationId, targetSenderType, UNREAD);
         if (messages.isEmpty()) {
             return List.of();
         }
@@ -117,20 +122,21 @@ public class ChatMessageService {
     }
 
     @Transactional(readOnly = true)
-    public long countUnread(Long chatConversationId, Long recipientId) {
-        if (chatConversationId == null || recipientId == null) {
-            throw new RuntimeException("Chat conversation id and recipient id are required");
+    public long countUnread(Long chatConversationId, String readerType) {
+        if (chatConversationId == null || readerType == null) {
+            throw new RuntimeException("Chat conversation id and reader type are required");
         }
-        return chatMessageRepository.countByChatConversationIdAndRecipientIdAndIsRead(chatConversationId, recipientId,
-                UNREAD);
+        String targetSenderType = "CLIENT".equals(readerType) ? "ADMIN" : "CLIENT";
+        return chatMessageRepository.countByChatConversationIdAndSenderTypeAndIsRead(chatConversationId, targetSenderType, UNREAD);
     }
 
     @Transactional(readOnly = true)
-    public long countUnreadByRecipient(Long recipientId) {
-        if (recipientId == null) {
-            throw new RuntimeException("Recipient id is required");
+    public long countUnreadByReaderType(String readerType) {
+        if (readerType == null) {
+            throw new RuntimeException("Reader type is required");
         }
-        return chatMessageRepository.countByRecipientIdAndIsRead(recipientId, UNREAD);
+        String targetSenderType = "CLIENT".equals(readerType) ? "ADMIN" : "CLIENT";
+        return chatMessageRepository.countBySenderTypeAndIsRead(targetSenderType, UNREAD);
     }
 
     @Transactional
@@ -139,6 +145,15 @@ public class ChatMessageService {
             throw new RuntimeException("Chat message not found with id: " + messageId);
         }
         chatMessageRepository.deleteById(messageId);
+    }
+
+    @Transactional
+    public void deleteConversation(Long conversationId) {
+        ChatConversation conversation = chatConversationRepository.findById(conversationId)
+                .orElseThrow(() -> new RuntimeException("Chat conversation not found with id: " + conversationId));
+        // Delete all messages first if not using cascade delete
+        chatMessageRepository.deleteByChatConversationId(conversationId);
+        chatConversationRepository.delete(conversation);
     }
 
     @Transactional(readOnly = true)
@@ -156,5 +171,35 @@ public class ChatMessageService {
         return chatMessageRepository
                 .findByChatConversationIdAndContentContainingIgnoreCase(chatConversationId, keyword, resolvedPageable)
                 .map(ChatMessageDTO::fromEntity);
+    }
+
+    @Transactional(readOnly = true)
+    public List<dev.uit.project.domain.dto.ChatConversationDTO> getConversationsByUserId(Long userId) {
+        return chatConversationRepository.findByUserId(userId)
+                .stream().map(dev.uit.project.domain.dto.ChatConversationDTO::fromEntity).toList();
+    }
+    
+    @Transactional(readOnly = true)
+    public List<dev.uit.project.domain.dto.ChatConversationDTO> getAllConversations() {
+        return chatConversationRepository.findAll()
+                .stream().map(dev.uit.project.domain.dto.ChatConversationDTO::fromEntity).toList();
+    }
+
+    @Transactional
+    public dev.uit.project.domain.dto.ChatConversationDTO getOrCreateConversation(String sessionId, Long userId) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session ID must not be null");
+        }
+        return chatConversationRepository.findBySessionId(sessionId)
+                .map(dev.uit.project.domain.dto.ChatConversationDTO::fromEntity)
+                .orElseGet(() -> {
+                    ChatConversation conversation = new ChatConversation();
+                    conversation.setSessionId(sessionId);
+                    if (userId != null) {
+                        User u1 = userRepository.findById(userId).orElse(null);
+                        conversation.setUser(u1);
+                    }
+                    return dev.uit.project.domain.dto.ChatConversationDTO.fromEntity(chatConversationRepository.save(conversation));
+                });
     }
 }

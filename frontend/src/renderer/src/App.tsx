@@ -11,6 +11,7 @@ import BookingDetailPage from '@renderer/client/bookingDetails/components/Bookin
 
 import Navbar from '@renderer/components/Navbar'
 import Footer from '@renderer/components/Footer'
+import { ChatWidget } from '@renderer/components/ChatWidget'
 
 function AppRouter(): React.JSX.Element {
   return (
@@ -33,7 +34,7 @@ function AppRouter(): React.JSX.Element {
         }
       />
 
-      {/* Protected Admin Routes */}
+      {/* Protected Admin Routes - No Footer */}
       <Route
         path="/admin/*"
         element={
@@ -43,6 +44,7 @@ function AppRouter(): React.JSX.Element {
         }
       />
 
+      {/* Client Routes with Footer */}
       <Route
         path="/"
         element={
@@ -56,7 +58,10 @@ function AppRouter(): React.JSX.Element {
         path="/search"
         element={
           <PublicRoute>
-            <SearchPage />
+            <>
+              <SearchPage />
+              <Footer />
+            </>
           </PublicRoute>
         }
       />
@@ -65,7 +70,10 @@ function AppRouter(): React.JSX.Element {
         path="/bookingdetail"
         element={
           <PublicRoute>
-            <BookingDetailPage />
+            <>
+              <BookingDetailPage />
+              <Footer />
+            </>
           </PublicRoute>
         }
       />
@@ -79,17 +87,28 @@ function AppRouter(): React.JSX.Element {
   )
 }
 
+import { useLocation } from 'react-router-dom'
+
+function AppContent() {
+  const location = useLocation()
+  const isAdminPath = location.pathname.startsWith('/admin')
+
+  return (
+    <LayoutProvider>
+      <Navbar />
+      <div className="w-full flex flex-col pt-14">
+        <AppRouter />
+        <Toaster position="top-right" richColors closeButton />
+      </div>
+      {!isAdminPath && <ChatWidget />}
+    </LayoutProvider>
+  )
+}
+
 function App(): React.JSX.Element {
   return (
     <BrowserRouter>
-      <LayoutProvider>
-        <Navbar />
-        <div className="w-full flex flex-col pt-14">
-          <AppRouter />
-          <Toaster position="top-right" richColors closeButton />
-        </div>
-        <Footer />
-      </LayoutProvider>
+      <AppContent />
     </BrowserRouter>
   )
 }

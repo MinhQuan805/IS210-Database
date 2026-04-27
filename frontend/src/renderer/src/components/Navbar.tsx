@@ -6,7 +6,7 @@ import { useAuthStore } from '@renderer/stores/auth-store'
 
 import { ThemeSwitch } from '@renderer/components/theme-switch'
 import { Button } from '@renderer/components/ui'
-import UserAvatar from '@renderer/admin/components/layout/UserAvatar'
+import { Avatar, AvatarFallback } from '@renderer/components/ui/avatar'
 
 export default function Navbar() {
   const { user } = useAuthStore()
@@ -36,15 +36,19 @@ export default function Navbar() {
 
         {!user ? (
           <Link to="/sign-in">
-            <User className="size-5!" />
+            <Button variant="ghost" className="rounded-full h-10 w-10 p-0">
+              <User className="size-5" />
+            </Button>
           </Link>
         ) : (
           <Link to="/admin">
-            <UserAvatar
-              user={{ name: user.name, email: user.email, avatar: '' }}
-              showMetadata={false}
-              className="size-5!"
-            />
+            <Button variant="ghost" className="rounded-full h-10 w-10 p-0 overflow-hidden">
+              <Avatar className="size-full">
+                <AvatarFallback className="text-sm font-medium">
+                  {user.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
           </Link>
         )}
       </div>

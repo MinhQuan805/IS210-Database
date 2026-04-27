@@ -19,11 +19,13 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long>,
 
     Optional<ChatMessage> findTopByChatConversationIdOrderByCreatedAtDesc(Long chatConversationId);
 
-    List<ChatMessage> findByChatConversationIdAndRecipientIdAndIsReadOrderByCreatedAtAsc(Long chatConversationId,
-                                                                                         Long recipientId,
+    List<ChatMessage> findByChatConversationIdAndSenderTypeAndIsReadOrderByCreatedAtAsc(Long chatConversationId,
+                                                                                         String senderType,
                                                                                          Integer isRead);
 
-    long countByChatConversationIdAndRecipientIdAndIsRead(Long chatConversationId, Long recipientId, Integer isRead);
+    long countByChatConversationIdAndSenderTypeAndIsRead(Long chatConversationId, String senderType, Integer isRead);
 
-    long countByRecipientIdAndIsRead(Long recipientId, Integer isRead);
+    long countBySenderTypeAndIsRead(String senderType, Integer isRead);
+
+    void deleteByChatConversationId(Long chatConversationId);
 }

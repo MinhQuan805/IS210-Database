@@ -1,4 +1,9 @@
-const API_BASE = 'http://localhost:8080/api'
+const DEFAULT_API_BASE = 'http://127.0.0.1:8080/api'
+const API_BASE = (import.meta.env.VITE_API_BASE || DEFAULT_API_BASE).replace(/\/+$/, '')
+
+function toApiUrl(endpoint: string): string {
+  return `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
+}
 
 type RequestOptions = {
   method?: string
@@ -22,7 +27,12 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     config.body = JSON.stringify(body)
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, config)
+  let response: Response
+  try {
+    response = await fetch(toApiUrl(endpoint), config)
+  } catch {
+    throw new Error(`Cannot connect to API at ${API_BASE}. Make sure backend is running.`)
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }))
@@ -54,11 +64,16 @@ export const api = {
     formData: FormData,
     headers?: Record<string, string>
   ): Promise<T> => {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      method: 'POST',
-      body: formData,
-      headers
-    })
+    let response: Response
+    try {
+      response = await fetch(toApiUrl(endpoint), {
+        method: 'POST',
+        body: formData,
+        headers
+      })
+    } catch {
+      throw new Error(`Cannot connect to API at ${API_BASE}. Make sure backend is running.`)
+    }
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: response.statusText }))
       throw new Error(error.message || `HTTP ${response.status}`)
@@ -67,14 +82,19 @@ export const api = {
   },
 
   download: async (endpoint: string, filename = 'file.pdf', headers?: Record<string, string>) => {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Client-Type': 'CUSTOMER',
-        ...headers
-      }
-    })
+    let response: Response
+    try {
+      response = await fetch(toApiUrl(endpoint), {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Client-Type': 'CUSTOMER',
+          ...headers
+        }
+      })
+    } catch {
+      throw new Error(`Cannot connect to API at ${API_BASE}. Make sure backend is running.`)
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: response.statusText }))

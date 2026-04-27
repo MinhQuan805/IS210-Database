@@ -16,6 +16,7 @@ public class BookingHistory {
     @SequenceGenerator(name = "booking_history_seq", sequenceName = "BOOKING_HISTORY_SEQ", allocationSize = 1)
     private Long id;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;

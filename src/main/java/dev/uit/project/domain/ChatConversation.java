@@ -24,9 +24,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "chat_conversations", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
-})
+@Table(name = "chat_conversations")
 public class ChatConversation {
 
     @Id
@@ -34,13 +32,15 @@ public class ChatConversation {
     @SequenceGenerator(name = "chat_conversation_seq", sequenceName = "CHAT_CONVERSATION_SEQ", allocationSize = 1)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user1_id", nullable = false)
-    private User user1;
+    @Column(name = "session_id", nullable = false, unique = true)
+    private String sessionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user2_id", nullable = false)
-    private User user2;
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "status", nullable = false)
+    private String status = "OPEN";
 
     @OneToMany(mappedBy = "chatConversation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ChatMessage> messages = new ArrayList<>();
@@ -66,20 +66,28 @@ public class ChatConversation {
         this.id = id;
     }
 
-    public User getUser1() {
-        return user1;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setUser1(User user1) {
-        this.user1 = user1;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public User getUser2() {
-        return user2;
+    public User getUser() {
+        return user;
     }
 
-    public void setUser2(User user2) {
-        this.user2 = user2;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<ChatMessage> getMessages() {

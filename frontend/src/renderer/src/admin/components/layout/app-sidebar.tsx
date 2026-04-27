@@ -29,6 +29,7 @@ const routeToUrl: Record<AdminRoute, string> = {
   customers: '/customers',
   reports: '/reports',
   content: '/content',
+  messages: '/messages',
   settings: '/settings',
   'settings-account': '/settings/account',
   'settings-appearance': '/settings/appearance',

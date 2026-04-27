@@ -271,29 +271,26 @@ CREATE TABLE sales_reports (
 
 CREATE TABLE chat_conversations (
     id NUMBER DEFAULT chat_conversation_seq.NEXTVAL PRIMARY KEY,
-    user1_id NUMBER NOT NULL,
-    user2_id NUMBER NOT NULL,
+    session_id VARCHAR2(100) UNIQUE NOT NULL,
+    user_id NUMBER,
+    status VARCHAR2(20) DEFAULT 'OPEN' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_chat_conv_user1 FOREIGN KEY (user1_id) REFERENCES users(id),
-    CONSTRAINT fk_chat_conv_user2 FOREIGN KEY (user2_id) REFERENCES users(id),
-    CONSTRAINT ck_chat_conv_distinct_users CHECK (user1_id <> user2_id),
-    CONSTRAINT ck_chat_conv_order CHECK (user1_id < user2_id),
-    CONSTRAINT uk_chat_conv_user_pair UNIQUE (user1_id, user2_id)
+    CONSTRAINT fk_chat_conv_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT chk_chat_conv_status CHECK (status IN ('OPEN', 'CLOSED'))
 );
 
 CREATE TABLE chat_messages (
     id NUMBER DEFAULT chat_message_seq.NEXTVAL PRIMARY KEY,
     chat_conversation_id NUMBER NOT NULL,
-    sender_id NUMBER NOT NULL,
-    recipient_id NUMBER NOT NULL,
+    sender_type VARCHAR2(20) NOT NULL,
+    admin_id NUMBER,
     content CLOB NOT NULL,
     is_read NUMBER(1) DEFAULT 0 NOT NULL,
     read_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_chat_msg_conversation FOREIGN KEY (chat_conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
-    CONSTRAINT fk_chat_msg_sender FOREIGN KEY (sender_id) REFERENCES users(id),
-    CONSTRAINT fk_chat_msg_recipient FOREIGN KEY (recipient_id) REFERENCES users(id),
-    CONSTRAINT ck_chat_msg_distinct_users CHECK (sender_id <> recipient_id),
+    CONSTRAINT fk_chat_msg_admin FOREIGN KEY (admin_id) REFERENCES users(id),
+    CONSTRAINT ck_chat_msg_sender_type CHECK (sender_type IN ('CLIENT', 'ADMIN')),
     CONSTRAINT ck_chat_msg_is_read CHECK (is_read IN (0, 1))
 );

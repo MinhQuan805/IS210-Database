@@ -9,13 +9,13 @@ import dev.uit.project.domain.ChatConversation;
 public class ChatConversationDTO {
 
     private Long id;
-    private Long user1Id;
-    private String user1Name;
-    private Long user2Id;
-    private String user2Name;
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    private String sessionId;
+    private Long userId;
+    private String userName;
+    private String status;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
     private ChatMessageDTO lastMessage;
 
@@ -25,10 +25,12 @@ public class ChatConversationDTO {
     public static ChatConversationDTO fromEntity(ChatConversation conversation) {
         ChatConversationDTO dto = new ChatConversationDTO();
         dto.setId(conversation.getId());
-        dto.setUser1Id(conversation.getUser1().getId());
-        dto.setUser1Name(conversation.getUser1().getFirstName() + " " + conversation.getUser1().getLastName());
-        dto.setUser2Id(conversation.getUser2().getId());
-        dto.setUser2Name(conversation.getUser2().getFirstName() + " " + conversation.getUser2().getLastName());
+        dto.setSessionId(conversation.getSessionId());
+        if (conversation.getUser() != null) {
+            dto.setUserId(conversation.getUser().getId());
+            dto.setUserName(conversation.getUser().getFirstName() + " " + conversation.getUser().getLastName());
+        }
+        dto.setStatus(conversation.getStatus());
         dto.setCreatedAt(conversation.getCreatedAt());
         dto.setUpdatedAt(conversation.getUpdatedAt());
         if (conversation.getMessages() != null && !conversation.getMessages().isEmpty()) {
@@ -48,36 +50,36 @@ public class ChatConversationDTO {
         this.id = id;
     }
 
-    public Long getUser1Id() {
-        return user1Id;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setUser1Id(Long user1Id) {
-        this.user1Id = user1Id;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
-    public String getUser1Name() {
-        return user1Name;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUser1Name(String user1Name) {
-        this.user1Name = user1Name;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public Long getUser2Id() {
-        return user2Id;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUser2Id(Long user2Id) {
-        this.user2Id = user2Id;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public String getUser2Name() {
-        return user2Name;
+    public String getStatus() {
+        return status;
     }
 
-    public void setUser2Name(String user2Name) {
-        this.user2Name = user2Name;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getCreatedAt() {
