@@ -14,5 +14,8 @@ public class BookingPolicyId implements Serializable {
     @Column(name = "policy_id")
     private Long policyId;
 
-    // equals + hashCode (BẮT BUỘC)
+    public BookingPolicyId(Long bookingId, Long policyId) {
+        this.bookingId = bookingId;
+        this.policyId = policyId;
+    }
 }

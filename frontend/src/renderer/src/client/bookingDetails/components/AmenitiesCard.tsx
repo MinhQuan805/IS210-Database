@@ -1,6 +1,6 @@
 import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card'
 import { Amenity } from '@renderer/admin/features/amenities/data/schema'
-import AmenitiesArcodition from '@renderer/admin/features/amenities/components/AmenitiesArcodition'
+import AmenitiesGrid from '@renderer/admin/features/amenities/components/AmenitiesGrid'
 import { Birdhouse } from 'lucide-react'
 
 export default function AmenitiesCard({ amenities }: { amenities: Amenity[] }) {
@@ -14,7 +14,7 @@ export default function AmenitiesCard({ amenities }: { amenities: Amenity[] }) {
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
         {!amenities.length && '(Không có)'}
-        <AmenitiesArcodition amenities={amenities} />
+        <AmenitiesGrid amenities={amenities} />
       </CardContent>
     </Card>
   )

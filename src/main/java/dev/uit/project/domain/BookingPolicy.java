@@ -19,6 +19,9 @@ public class BookingPolicy {
     @JoinColumn(name = "policy_id")
     private Policy policy;
 
+    public BookingPolicy() {
+    }
+
     public BookingPolicy(BookingPolicyId id, Booking booking, Policy policy) {
         this.id = id;
         this.booking = booking;

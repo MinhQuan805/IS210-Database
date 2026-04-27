@@ -1,19 +1,44 @@
 package dev.uit.project.service;
 
-import dev.uit.project.domain.*;
-import dev.uit.project.domain.BookingHistory.BookingAction;
-import dev.uit.project.domain.BookingHistory.BookingActor;
-import dev.uit.project.domain.dto.*;
-import dev.uit.project.repository.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
+import dev.uit.project.domain.Amenity;
+import dev.uit.project.domain.Booking;
+import dev.uit.project.domain.BookingHistory;
+import dev.uit.project.domain.BookingHistory.BookingAction;
+import dev.uit.project.domain.BookingHistory.BookingActor;
+import dev.uit.project.domain.BookingPolicy;
+import dev.uit.project.domain.BookingPolicyId;
+import dev.uit.project.domain.Customer;
+import dev.uit.project.domain.Policy;
+import dev.uit.project.domain.Room;
+import dev.uit.project.domain.RoomType;
+import dev.uit.project.domain.dto.AmenityDTO;
+import dev.uit.project.domain.dto.BookingDTO;
+import dev.uit.project.domain.dto.BookingDetailDTO;
+import dev.uit.project.domain.dto.BookingHistoryDTO;
+import dev.uit.project.domain.dto.CreateBookingRequest;
+import dev.uit.project.domain.dto.PaymentDTO;
+import dev.uit.project.domain.dto.PolicyDTO;
+import dev.uit.project.domain.dto.PromotionDTO;
+import dev.uit.project.domain.dto.UpdateBookingRequest;
+import dev.uit.project.repository.AmenityRepository;
+import dev.uit.project.repository.BookingHistoryRepository;
+import dev.uit.project.repository.BookingPolicyRepository;
+import dev.uit.project.repository.BookingRepository;
+import dev.uit.project.repository.CustomerRepository;
+import dev.uit.project.repository.PolicyRepository;
+import dev.uit.project.repository.RoomRepository;
+import dev.uit.project.repository.RoomTypeRepository;
 
 @Service
 public class BookingService {
@@ -24,17 +49,22 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final AmenityRepository amenityRepository;
+    private final PolicyRepository policyRepository;
+    private final BookingPolicyRepository bookingPolicyRepository;
     private final PricingService pricingService;
 
     public BookingService(BookingRepository bookingRepository, BookingHistoryRepository bookingHistoryRepository,
             CustomerRepository customerRepository, RoomRepository roomRepository, RoomTypeRepository roomTypeRepository,
-            AmenityRepository amenityRepository, PricingService pricingService) {
+            AmenityRepository amenityRepository, PolicyRepository policyRepository,
+            BookingPolicyRepository bookingPolicyRepository, PricingService pricingService) {
         this.bookingRepository = bookingRepository;
         this.bookingHistoryRepository = bookingHistoryRepository;
         this.customerRepository = customerRepository;
         this.roomRepository = roomRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.amenityRepository = amenityRepository;
+        this.policyRepository = policyRepository;
+        this.bookingPolicyRepository = bookingPolicyRepository;
         this.pricingService = pricingService;
     }
 
@@ -73,7 +103,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
-        
+
         Booking booking = new Booking();
         booking.setCustomer(customer);
         booking.setRoom(room);
@@ -87,6 +117,19 @@ public class BookingService {
 
         Booking saved = bookingRepository.save(booking);
         addHistory(saved, BookingAction.CREATED, performedBy, "Đã đặt phòng");
+
+        // Gán tất cả policy cho bookings
+
+        List<Policy> policies = policyRepository.findAll();
+
+        List<BookingPolicy> bookingPolicies = policies.stream()
+            .map(policy -> {
+                BookingPolicyId bpId = new BookingPolicyId(saved.getId(), policy.getId());
+                return new BookingPolicy(bpId, saved, policy);
+            })
+            .collect(Collectors.toList());
+
+        bookingPolicyRepository.saveAll(bookingPolicies);
 
         return BookingDTO.fromEntity(saved);
     }

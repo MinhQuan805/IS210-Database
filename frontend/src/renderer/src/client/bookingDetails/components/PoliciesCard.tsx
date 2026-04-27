@@ -8,7 +8,7 @@ export default function PoliciesCard({ policies }: { policies: Policy[] }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <div className="font-bold leading-tight text-main text-2xl">DANH SÁCH KHUYẾN MÃI</div>
+          <div className="font-bold leading-tight text-main text-2xl">CHÍNH SÁCH ĐẶT PHÒNG</div>
           <ClipboardList className="size-10" />
         </CardTitle>
         <CardContent className="flex flex-col gap-1">

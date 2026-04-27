@@ -102,7 +102,7 @@ COMPOUND TRIGGER
         v_total_price NUMBER;
     BEGIN
         FOR i IN 1 .. v_count LOOP
-            -- Tổng tiền đã thanh toán thành công cho booking này
+            -- Tổng tiền đã thanh toán thành công đặt cọc cho booking này
             SELECT NVL(SUM(amount), 0)
             INTO   v_total_paid
             FROM   payment
@@ -115,8 +115,8 @@ COMPOUND TRIGGER
             FROM   bookings
             WHERE  id = v_booking_ids(i);
 
-            -- Nếu đã thanh toán đủ -> xác nhận booking
-            IF v_total_paid >= v_total_price THEN
+            -- Nếu đã thanh toán đặt cọc đủ 50% -> xác nhận booking
+            IF v_total_paid >= v_total_price / 2 THEN
 
                 UPDATE bookings
                 SET    status = 'CONFIRMED'

@@ -17,6 +17,7 @@ import BookingDetailCard from '@renderer/client/bookingDetails/components/Bookin
 import { bookingDetailApi } from '@renderer/client/bookingDetails/data/bookingDetailApi'
 import { useState } from 'react'
 import { BookingDetail } from '@renderer/client/bookingDetails/data/schema'
+import { paymentApi } from '@renderer/admin/features/payments/data/api'
 
 const formSchema = z.object({
   customer_email: z.string().min(1, 'Email là bắt buộc').email('Email không hợp lệ'),
@@ -54,6 +55,23 @@ export default function BookingDetailPage() {
       console.log('Failed to fetch booking details: ', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handlePayment() {
+    try {
+      if (!bookingDetails) {
+        toast.error('Hiện chưa thanh toán được! Hãy thử lại sau ...')
+        return
+      }
+
+      const data = paymentApi.create({
+        bookingId: bookingDetails.id,
+        amount: bookingDetails.totalPrice
+      })
+    } catch (err) {
+      console.log('Failed to create payment: ', err)
+      toast.error('Lỗi thanh toán! Hãy thử lại sau ...')
     }
   }
 
@@ -112,10 +130,11 @@ export default function BookingDetailPage() {
           <>
             <BookingDetailCard bookingDetail={bookingDetails} />
             {bookingDetails.status === 'PENDING' && (
-              <div className="flex item-center justify-evenly">
-                <Button variant="outline">Chỉnh sửa</Button>
-                <Button variant="destructive">Hủy</Button>
-                <Button variant="default">Thanh toán ngay</Button>
+              <div className="flex flex-col item-center justify-center">
+                <Button variant="outline">Sửa thông tin cá nhân</Button>
+                <Button variant="outline">Sửa thông tin đặt phòng</Button>
+                <Button variant="destructive">Hủy đặt phòng</Button>
+                <Button onClick={handlePayment}>Thanh toán ngay</Button>
               </div>
             )}
           </>

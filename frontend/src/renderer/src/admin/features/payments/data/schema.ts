@@ -16,3 +16,10 @@ export const paymentSchema = z.object({
 })
 
 export type Payment = z.infer<typeof paymentSchema>
+
+export const createPaymentRequestSchema = z.object({
+  bookingId: z.number(),
+  amount: z.number()
+})
+
+export type CreatePaymentRequest = z.infer<typeof createPaymentRequestSchema>
