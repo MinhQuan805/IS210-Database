@@ -36,13 +36,7 @@ export default function Navbar() {
 
         {!user ? (
           <Link to="/sign-in">
-<<<<<<< HEAD
-            <Button variant="ghost" className="rounded-full h-10 w-10 p-0">
-              <User className="size-5" />
-            </Button>
-=======
             <User className="size-5! text-white" />
->>>>>>> 788bdfa0e3c82a1b4030cb174062ccfd49437134
           </Link>
         ) : (
           <Link to="/admin">
