@@ -3,11 +3,11 @@ import { type UserStatus } from './schema'
 
 // Status badge colors mapping
 export const statusColors = new Map<UserStatus, string>([
-  ['active', 'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200'],
-  ['inactive', 'bg-neutral-300/40 border-neutral-300'],
-  ['invited', 'bg-sky-200/40 text-sky-900 dark:text-sky-100 border-sky-300'],
+  ['ACTIVE', 'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200'],
+  ['INACTIVE', 'bg-neutral-300/40 border-neutral-300'],
+  ['INVITED', 'bg-sky-200/40 text-sky-900 dark:text-sky-100 border-sky-300'],
   [
-    'suspended',
+    'SUSPENDED',
     'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10'
   ]
 ])
@@ -36,15 +36,15 @@ export const roles = [
   },
   {
     label: 'Client',
-    value: 'client',
+    value: 'CLIENT',
     icon: Users
   }
 ] as const
 
 // Status options
 export const statuses = [
-  { label: 'Active', value: 'active' },
-  { label: 'Inactive', value: 'inactive' },
-  { label: 'Invited', value: 'invited' },
-  { label: 'Suspended', value: 'suspended' }
+  { label: 'Active', value: 'ACTIVE' },
+  { label: 'Inactive', value: 'INACTIVE' },
+  { label: 'Invited', value: 'INVITED' },
+  { label: 'Suspended', value: 'SUSPENDED' }
 ] as const

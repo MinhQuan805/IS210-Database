@@ -15,7 +15,7 @@ export const userRoleSchema = z.union([
   z.literal('ADMIN'),
   z.literal('MANAGER'),
   z.literal('RECEPTIONIST'),
-  z.literal('client')
+  z.literal('CLIENT')
 ])
 export type UserRole = z.infer<typeof userRoleSchema>
 
@@ -44,7 +44,7 @@ export const createUserSchema = z.object({
   email: z.email('Email không hợp lệ.'),
   phoneNumber: z.string().optional().default(''),
   status: userStatusSchema.default('ACTIVE'),
-  role: userRoleSchema.default('client'),
+  role: userRoleSchema.default('CLIENT'),
   password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự.')
 })
 export type CreateUserRequest = z.infer<typeof createUserSchema>

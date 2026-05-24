@@ -44,7 +44,7 @@ export function BookingsProvider({ children }: BookingsProviderProps) {
       const params: { status?: BookingStatus } = {}
       if (statusFilter) params.status = statusFilter
       const data = await bookingsApi.list(params)
-      setBookings(data.content || [])
+      setBookings(data)
     } catch (error) {
       toast.error('Không thể tải danh sách đặt phòng.')
       console.error('Failed to fetch bookings:', error)

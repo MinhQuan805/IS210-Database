@@ -99,7 +99,7 @@ export function UsersActionDialog({ currentRow, open, onOpenChange }: UsersActio
           username: '',
           email: '',
           role: '',
-          status: 'active',
+          status: 'ACTIVE',
           phoneNumber: '',
           password: '',
           confirmPassword: '',

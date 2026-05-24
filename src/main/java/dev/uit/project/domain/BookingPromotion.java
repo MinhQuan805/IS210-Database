@@ -23,6 +23,9 @@ public class BookingPromotion {
     @JoinColumn(name = "promotion_id", nullable = false)
     private Promotion promotion;
 
+    public BookingPromotion() {
+    }
+
     public BookingPromotion(BookingPromotionId id, Booking booking, Promotion promotion) {
         this.id = id;
         this.booking = booking;

@@ -19,11 +19,14 @@ export const roomTypesApi = {
 
 // Rooms API
 export const roomsApi = {
-  list: (params: { roomTypeId?: number; status?: RoomStatus }) => {
+  list: async (params: { roomTypeId?: number; status?: RoomStatus }): Promise<Room[]> => {
     const searchParams = new URLSearchParams()
     if (params.roomTypeId) searchParams.append('roomTypeId', String(params.roomTypeId))
     if (params.status) searchParams.append('status', params.status)
-    return api.get<Room[]>(`/admin/rooms?${searchParams.toString()}`)
+    const data = await api.get<Room[] | { content: Room[] }>(`/admin/rooms?${searchParams.toString()}`)
+    if (Array.isArray(data)) return data
+    if (data && Array.isArray(data.content)) return data.content
+    return []
   },
   getById: (id: number) => api.get<Room>(`/admin/rooms/${id}`),
   create: (data: CreateRoomRequest) => api.post<Room>('/admin/rooms', data),

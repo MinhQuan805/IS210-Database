@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Bed, Calendar, DollarSign, TrendingUp, Users } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Bed, Calendar, DollarSign, TrendingUp, Users, Download, Loader2 } from 'lucide-react'
 import {
   LineChart,
   Line,
@@ -16,11 +16,15 @@ import {
   Cell
 } from 'recharts'
 import { cn } from '@/lib/utils'
-import { Main} from '@/admin/components/layout'
+import { Main } from '@/admin/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import html2canvas from 'html2canvas-pro'
+import { jsPDF } from 'jspdf'
+import { toast } from 'sonner'
+import { PrintableReport } from './components/PrintableReport'
 import {
   reportsApi,
   type OverviewData,
@@ -45,7 +49,7 @@ const COLORS = [
 const formatVND = (val: number) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
 
-const formatDate = (date: string) => new Date(date).toLocaleDateString('vi-VN')
+const formatDate = (date: any) => new Date(date).toLocaleDateString('vi-VN')
 
 function getDefaultDateRange() {
   const end = new Date()
@@ -73,6 +77,81 @@ function getBookingStatusLabel(status: string): string {
 }
 
 export function Reports() {
+  // Export to PDF state
+  const [isExporting, setIsExporting] = useState(false)
+  const printRef = useRef<HTMLDivElement>(null)
+
+  const handleExportPDF = async () => {
+    if (isExporting) return
+    setIsExporting(true)
+    const toastId = toast.loading('Đang chuẩn bị dữ liệu báo cáo...', {
+      position: 'top-center'
+    })
+
+    try {
+      // Wait for React to render the offscreen printable report
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      const container = printRef.current
+      if (!container) {
+        throw new Error('Không tìm thấy mẫu báo cáo để in.')
+      }
+
+      toast.loading('Đang chụp biểu đồ và dữ liệu...', {
+        id: toastId,
+        position: 'top-center'
+      })
+
+      const pages = container.querySelectorAll('.printable-page')
+      if (pages.length === 0) {
+        throw new Error('Lỗi cấu trúc trang báo cáo.')
+      }
+
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      for (let i = 0; i < pages.length; i++) {
+        const pageElement = pages[i] as HTMLElement
+
+        // Render canvas
+        const canvas = await html2canvas(pageElement, {
+          scale: 2, // High resolution
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#f8fafc' // Keep background consistent
+        })
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95)
+
+        if (i > 0) {
+          pdf.addPage()
+        }
+
+        // A4 size: 210mm x 297mm
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST')
+      }
+
+      const dateStr = new Date().toISOString().split('T')[0]
+      pdf.save(`Bao_Cao_${dateStr}.pdf`)
+
+      toast.success('Xuất báo cáo PDF thành công!', {
+        id: toastId,
+        position: 'top-center'
+      })
+    } catch (error: any) {
+      console.error(error)
+      toast.error(error?.message || 'Có lỗi xảy ra khi xuất PDF.', {
+        id: toastId,
+        position: 'top-center'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   // Overview
   const [overview, setOverview] = useState<OverviewData | null>(null)
   const [overviewLoading, setOverviewLoading] = useState(true)
@@ -181,6 +260,19 @@ export function Reports() {
       <Main>
         <div className="mb-2 flex items-center justify-between space-y-2">
           <h1 className="text-2xl font-bold tracking-tight">Báo Cáo và Thống Kê</h1>
+          <Button onClick={handleExportPDF} disabled={isExporting} className="gap-2" size="sm">
+            {isExporting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang xuất PDF...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4" />
+                Xuất Báo Cáo PDF
+              </>
+            )}
+          </Button>
         </div>
 
         {/* Overview Cards */}
@@ -270,7 +362,7 @@ export function Reports() {
                       />
                       <Tooltip
                         labelFormatter={formatDate}
-                        formatter={(value: number, name: string) => [
+                        formatter={(value: any, name: any): any => [
                           name === 'revenue' ? formatVND(value) : value,
                           name === 'revenue' ? 'Doanh thu' : 'Số đặt phòng'
                         ]}
@@ -341,7 +433,7 @@ export function Reports() {
                         <YAxis tickFormatter={(v: number) => formatVND(v)} />
                         <Tooltip
                           labelFormatter={formatDate}
-                          formatter={(value: number) => [formatVND(value), 'Doanh thu']}
+                          formatter={(value: any): any => [formatVND(value), 'Doanh thu']}
                         />
                         <Legend formatter={() => 'Doanh thu'} />
                         <Bar dataKey="revenue" fill="#8884d8" radius={[4, 4, 0, 0]} />
@@ -434,7 +526,7 @@ export function Reports() {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ roomType, count, percent }) =>
+                          label={({ roomType, count, percent }: any) =>
                             `${roomType}: ${count} (${(percent * 100).toFixed(0)}%)`
                           }
                           outerRadius={100}
@@ -473,7 +565,7 @@ export function Reports() {
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis type="number" tickFormatter={(v) => formatVND(v)} />
                         <YAxis type="category" dataKey="roomType" width={100} />
-                        <Tooltip formatter={(value: number) => [formatVND(value), 'Doanh thu']} />
+                        <Tooltip formatter={(value: any): any => [formatVND(value), 'Doanh thu']} />
                         <Legend formatter={() => 'Doanh thu'} />
                         <Bar dataKey="revenue" fill="#82ca9d" radius={[0, 4, 4, 0]} />
                       </BarChart>
@@ -512,7 +604,7 @@ export function Reports() {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ statusLabel, count, percent }) =>
+                          label={({ statusLabel, count, percent }: any) =>
                             `${statusLabel}: ${count} (${(percent * 100).toFixed(0)}%)`
                           }
                           outerRadius={100}
@@ -584,6 +676,20 @@ export function Reports() {
           </TabsContent>
         </Tabs>
       </Main>
+      {isExporting && (
+        <PrintableReport
+          ref={printRef}
+          startDate={trendsRange.startDate}
+          endDate={trendsRange.endDate}
+          overview={overview}
+          trends={trends}
+          revenueChartData={revenueChartData}
+          occupancy={occupancy}
+          roomsByType={roomsByType}
+          bookingsByStatus={bookingsByStatus}
+          revenueByRoomType={revenueByRoomType}
+        />
+      )}
     </>
   )
 }

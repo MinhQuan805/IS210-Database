@@ -18,7 +18,7 @@ public class CustomerDTO {
     private LocalDate dateOfBirth;
     private String address;
     private String notes;
-    private Integer isVIP;
+    private Boolean isVIP;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -37,7 +37,7 @@ public class CustomerDTO {
         dto.setDateOfBirth(customer.getDateOfBirth());
         dto.setAddress(customer.getAddress());
         dto.setNotes(customer.getNotes());
-        dto.setIsVIP(customer.getIsVIP());
+        dto.setIsVIP(customer.getIsVIP() != null && customer.getIsVIP() == 1);
         dto.setCreatedAt(customer.getCreatedAt());
         dto.setUpdatedAt(customer.getUpdatedAt());
         return dto;
@@ -63,8 +63,8 @@ public class CustomerDTO {
     public void setAddress(String address) { this.address = address; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public Integer getIsVIP() { return isVIP; }
-    public void setIsVIP(Integer isVIP) { this.isVIP = isVIP; }
+    public Boolean getIsVIP() { return isVIP; }
+    public void setIsVIP(Boolean isVIP) { this.isVIP = isVIP; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

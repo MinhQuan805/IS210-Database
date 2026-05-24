@@ -61,3 +61,36 @@ Lệnh test:
 ```sql
 SELECT * FROM users;
 ```
+
+## Hướng dẫn kết nối và chạy code SQL trong Oracle SQL Developer
+
+Để kết nối Oracle SQL Developer với database Oracle đang chạy trong Docker container, bạn làm theo các bước sau:
+
+### 1. Tạo kết nối mới (New Connection)
+1. Mở **Oracle SQL Developer**.
+2. Nhấn nút **`+` (New Connection...)** ở góc trên bên trái cửa sổ *Connections*.
+3. Nhập thông tin kết nối như sau:
+   - **Name**: `Hotel_DB` (hoặc tên bất kỳ bạn muốn)
+   - **Database Type**: `Oracle`
+   - **Username**: `hotel`
+   - **Password**: `Admin123` (Tích chọn **Save Password**)
+   - **Connection Type**: `Basic`
+   - **Role**: `default`
+   - **Hostname**: `localhost`
+   - **Port**: `1521`
+   - **Service name**: Tích chọn mục này và điền `FREEPDB1` (⚠️ **Quan trọng**: Phải chọn **Service name** chứ *không* dùng **SID**).
+4. Nhấn nút **Test** ở góc dưới. Nếu hiển thị trạng thái `Status: Success` thì nhấn **Save** rồi **Connect**.
+
+### 2. Chạy code SQL trong SQL Developer
+Sau khi kết nối thành công, một Worksheet mới sẽ hiển thị. Bạn có thể chạy code bằng các cách sau:
+
+- **Chạy từng câu lệnh (Run Statement)**:
+  - Đặt con trỏ chuột tại câu lệnh SQL (Ví dụ: `SELECT * FROM users;`).
+  - Nhấn nút ▶️ (**Run Statement**) trên thanh công cụ hoặc bấm tổ hợp phím `Ctrl + Enter`.
+- **Chạy toàn bộ file/script (Run Script)**:
+  - Viết/Dán đoạn code SQL vào Worksheet.
+  - Nhấn nút 📄▶️ (**Run Script**) trên thanh công cụ hoặc bấm phím `F5`.
+- **Mở và chạy file `.sql` có sẵn**:
+  - Vào **File** -> **Open...** và chọn file SQL (ví dụ: các file trong thư mục `docker/initdb`).
+  - Chọn connection `Hotel_DB` ở góc trên bên phải của file vừa mở.
+  - Nhấn `F5` hoặc nút **Run Script** để thực thi toàn bộ file.

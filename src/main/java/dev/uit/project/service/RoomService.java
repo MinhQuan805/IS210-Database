@@ -70,6 +70,14 @@ public class RoomService {
         return RoomTypeDTO.fromEntity(roomTypeRepository.save(roomType));
     }
 
+    @Transactional
+    public void deleteRoomType(Long id) {
+        if (!roomTypeRepository.existsById(id)) {
+            throw new RuntimeException("Room type not found with id: " + id);
+        }
+        roomTypeRepository.deleteById(id);
+    }
+
     // Room operations
     @Transactional(readOnly = true)
     public Page<RoomDTO> getAllRooms(Room.RoomStatus status, Long roomTypeId, Integer floor, Pageable pageable) {
@@ -135,5 +143,53 @@ public class RoomService {
         RoomType roomType = room.getRoomType();
 
         return RoomTypeDTO.fromEntity(roomType);
+    }
+
+    @Transactional(readOnly = true)
+    public RoomDTO getRoomById(Long id) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+        return RoomDTO.fromEntity(room);
+    }
+
+    @Transactional
+    public RoomDTO createRoom(CreateRoomRequest request) {
+        RoomType roomType = roomTypeRepository.findById(request.getRoomTypeId())
+                .orElseThrow(() -> new RuntimeException("Room type not found with id: " + request.getRoomTypeId()));
+
+        Room room = new Room();
+        room.setRoomType(roomType);
+        room.setRoomNumber(request.getRoomNumber());
+        room.setFloor(request.getFloor());
+        room.setStatus(request.getStatus() != null ? request.getStatus() : Room.RoomStatus.AVAILABLE);
+        room.setNotes(request.getNotes());
+
+        return RoomDTO.fromEntity(roomRepository.save(room));
+    }
+
+    @Transactional
+    public RoomDTO updateRoom(Long id, CreateRoomRequest request) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Room not found with id: " + id));
+
+        if (request.getRoomTypeId() != null) {
+            RoomType roomType = roomTypeRepository.findById(request.getRoomTypeId())
+                    .orElseThrow(() -> new RuntimeException("Room type not found with id: " + request.getRoomTypeId()));
+            room.setRoomType(roomType);
+        }
+        if (request.getRoomNumber() != null) room.setRoomNumber(request.getRoomNumber());
+        if (request.getFloor() != null) room.setFloor(request.getFloor());
+        if (request.getStatus() != null) room.setStatus(request.getStatus());
+        if (request.getNotes() != null) room.setNotes(request.getNotes());
+
+        return RoomDTO.fromEntity(roomRepository.save(room));
+    }
+
+    @Transactional
+    public void deleteRoom(Long id) {
+        if (!roomRepository.existsById(id)) {
+            throw new RuntimeException("Room not found with id: " + id);
+        }
+        roomRepository.deleteById(id);
     }
 }

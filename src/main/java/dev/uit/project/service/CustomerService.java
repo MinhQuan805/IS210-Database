@@ -125,4 +125,17 @@ public class CustomerService {
                 bookingRepository.countCompletedByCustomer(customerId)
         );
     }
+
+    @Transactional
+    public void deleteCustomer(Long id) {
+        if (!customerRepository.existsById(id)) {
+            throw new RuntimeException("Customer not found with id: " + id);
+        }
+        try {
+            customerRepository.deleteById(id);
+            customerRepository.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa khách hàng vì có dữ liệu đặt phòng liên quan. Hãy xóa các đặt phòng trước.");
+        }
+    }
 }

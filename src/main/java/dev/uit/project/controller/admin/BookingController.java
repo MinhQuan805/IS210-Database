@@ -86,4 +86,22 @@ public class BookingController {
     public ResponseEntity<List<BookingHistoryDTO>> getBookingHistory(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.getBookingHistory(id));
     }
+
+    @PutMapping("/{id}/check-in")
+    public ResponseEntity<BookingDTO> checkInBooking(@RequestHeader("Client-Type") BookingActor clientType,
+                                                     @PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.checkInBooking(id, clientType));
+    }
+
+    @PutMapping("/{id}/check-out")
+    public ResponseEntity<BookingDTO> checkOutBooking(@RequestHeader("Client-Type") BookingActor clientType,
+                                                      @PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.checkOutBooking(id, clientType));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
+        bookingService.deleteBooking(id);
+        return ResponseEntity.noContent().build();
+    }
 }

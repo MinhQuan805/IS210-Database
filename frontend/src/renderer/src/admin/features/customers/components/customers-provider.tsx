@@ -34,8 +34,8 @@ export function CustomersProvider({ children }: CustomersProviderProps) {
   const fetchCustomers = useCallback(async () => {
     try {
       setLoading(true)
-      const page = await customersApi.list()
-      setCustomers(page.content || [])
+      const data = await customersApi.list()
+      setCustomers(data)
     } catch (error) {
       toast.error('Không thể tải danh sách khách hàng.')
       console.error('Failed to fetch customers:', error)

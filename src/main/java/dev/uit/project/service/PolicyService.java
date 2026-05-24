@@ -71,4 +71,24 @@ public class PolicyService {
 
         return PolicyDTO.fromEntity(policyRepository.save(policy));
     }
+
+    @Transactional(readOnly = true)
+    public PolicyDTO getPolicyById(Long id) {
+        return policyRepository.findById(id)
+                .map(PolicyDTO::fromEntity)
+                .orElseThrow(() -> new RuntimeException("Policy not found with id: " + id));
+    }
+
+    @Transactional
+    public void deletePolicy(Long id) {
+        if (!policyRepository.existsById(id)) {
+            throw new RuntimeException("Policy not found with id: " + id);
+        }
+        try {
+            policyRepository.deleteById(id);
+            policyRepository.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa chính sách vì đã được liên kết với đặt phòng.");
+        }
+    }
 }

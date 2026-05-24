@@ -25,9 +25,14 @@ public class PolicyController {
         return ResponseEntity.ok(policyService.getAllPolicies());
     }
 
-    @GetMapping("/{type}")
+    @GetMapping("/type/{type}")
     public ResponseEntity<List<PolicyDTO>> getPoliciesByType(@PathVariable Policy.PolicyType type) {
         return ResponseEntity.ok(policyService.getPoliciesByType(type));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PolicyDTO> getPolicyById(@PathVariable Long id) {
+        return ResponseEntity.ok(policyService.getPolicyById(id));
     }
 
     @PostMapping
@@ -44,7 +49,13 @@ public class PolicyController {
                 body.get("title"), body.get("content"), body.get("language")));
     }
 
-    @PostMapping("/{id}/publish")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePolicy(@PathVariable Long id) {
+        policyService.deletePolicy(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/publish")
     public ResponseEntity<PolicyDTO> publishPolicy(@PathVariable Long id) {
         return ResponseEntity.ok(policyService.publishPolicy(id));
     }

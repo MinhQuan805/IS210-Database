@@ -61,7 +61,7 @@ export function RoomsProvider({ children }: RoomsProviderProps) {
       const params: { status?: RoomStatus } = {}
       if (statusFilter) params.status = statusFilter
       const data = await roomsApi.list(params)
-      setRooms(data.content || [])
+      setRooms(data)
     } catch (error) {
       toast.error('Không thể tải danh sách phòng.')
       console.error('Failed to fetch rooms:', error)

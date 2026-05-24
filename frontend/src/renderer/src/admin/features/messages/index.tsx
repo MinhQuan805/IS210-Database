@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { Search, MoreVertical, Send, Trash2, } from 'lucide-react'
+import { Search, MoreVertical, Send, Trash2, Smile } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -48,9 +48,13 @@ export function Messages() {
     try {
       const res = await fetch('http://127.0.0.1:8080/api/chats/conversations')
       const data = await res.json()
-      setConversations(data)
-      if (data.length > 0 && !activeConvId) {
-        setActiveConvId(data[0].id)
+      if (Array.isArray(data)) {
+        setConversations(data)
+        if (data.length > 0 && !activeConvId) {
+          setActiveConvId(data[0].id)
+        }
+      } else {
+        setConversations([])
       }
     } catch (e) {
       console.error('Failed to load conversations', e)
@@ -70,7 +74,11 @@ export function Messages() {
       try {
         const res = await fetch(`http://127.0.0.1:8080/api/chats/conversations/${activeConvId}/messages`)
         const data = await res.json()
-        setMessages(data)
+        if (Array.isArray(data)) {
+          setMessages(data)
+        } else {
+          setMessages([])
+        }
         setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
       } catch (e) {
         console.error('Failed to load messages', e)
@@ -274,7 +282,7 @@ export function Messages() {
             {/* Messages */}
             <ScrollArea className="flex-1 p-6">
               <div className="flex flex-col gap-6">
-                {messages.map((msg, index) => {
+                {Array.isArray(messages) && messages.map((msg, index) => {
                   const isAdmin = msg.senderType === 'ADMIN';
 
                   return isAdmin ? (

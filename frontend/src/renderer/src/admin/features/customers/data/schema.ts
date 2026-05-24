@@ -12,7 +12,7 @@ export const customerSchema = z.object({
   dateOfBirth: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
-  isVIP: z.boolean().default(false),
+  isVIP: z.preprocess((val) => val === true || val === 1, z.boolean()).default(false),
   createdAt: z.string().nullable().optional(),
   updatedAt: z.string().nullable().optional()
 })

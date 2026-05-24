@@ -115,7 +115,7 @@ export function RoomsBulkDialog({ open, onOpenChange }: RoomsBulkDialogProps) {
                   <FormItem className="grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1">
                     <FormLabel className="col-span-2 text-end">Loại phòng</FormLabel>
                     <SelectDropdown
-                      defaultValue={String(field.value)}
+                      defaultValue={field.value > 0 ? String(field.value) : undefined}
                       onValueChange={(value) => field.onChange(Number(value))}
                       placeholder="Chọn loại phòng"
                       items={roomTypeItems}

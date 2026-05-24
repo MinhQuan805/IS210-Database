@@ -52,6 +52,9 @@ import {
   type CreateDailyPriceRequest,
   createDailyPriceSchema
 } from '../data/schema'
+import { SelectDropdown } from '@/components/select-dropdown'
+import { roomTypesApi } from '@/admin/features/rooms/data/api'
+import type { RoomType } from '@/admin/features/rooms/data/schema'
 
 // --- Helpers ---
 const formatVND = (price: number) =>
@@ -77,6 +80,7 @@ type DailyPricingContextType = {
   addItem: (data: CreateDailyPriceRequest) => Promise<void>
   updateItem: (id: number, data: CreateDailyPriceRequest) => Promise<void>
   deleteItem: (id: number) => Promise<void>
+  roomTypes: RoomType[]
 }
 
 const DailyPricingContext = React.createContext<DailyPricingContextType | null>(null)
@@ -95,15 +99,20 @@ function DailyPricingProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [filterStartDate, setFilterStartDate] = useState('')
   const [filterEndDate, setFilterEndDate] = useState('')
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([])
 
   const fetchItems = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await dailyPricingApi.list({
-        startDate: filterStartDate || undefined,
-        endDate: filterEndDate || undefined
-      })
+      const [data, rtData] = await Promise.all([
+        dailyPricingApi.list({
+          startDate: filterStartDate || undefined,
+          endDate: filterEndDate || undefined
+        }),
+        roomTypesApi.list()
+      ])
       setItems(data || [])
+      setRoomTypes(rtData)
     } catch (error) {
       toast.error('Không thể tải danh sách giá theo ngày.')
       console.error('Failed to fetch daily pricing:', error)
@@ -147,7 +156,8 @@ function DailyPricingProvider({ children }: { children: React.ReactNode }) {
         refetch: fetchItems,
         addItem,
         updateItem,
-        deleteItem
+        deleteItem,
+        roomTypes
       }}
     >
       {children}
@@ -165,7 +175,7 @@ function ActionDialog({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const { addItem, updateItem } = useDailyPricing()
+  const { addItem, updateItem, roomTypes } = useDailyPricing()
   const isEdit = !!currentRow
   const [submitting, setSubmitting] = useState(false)
 
@@ -234,17 +244,15 @@ function ActionDialog({
                 name="roomTypeId"
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1">
-                    <FormLabel className="col-span-2 text-end">Loại phòng (ID)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Nhập ID loại phòng"
-                        className="col-span-4"
-                        autoComplete="off"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
+                    <FormLabel className="col-span-2 text-end">Loại phòng</FormLabel>
+                    <SelectDropdown
+                      defaultValue={field.value > 0 ? String(field.value) : undefined}
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      placeholder="Chọn loại phòng"
+                      items={roomTypes.map((rt) => ({ label: rt.name, value: String(rt.id) }))}
+                      className="col-span-4"
+                      isControlled
+                    />
                     <FormMessage className="col-span-4 col-start-3" />
                   </FormItem>
                 )}

@@ -51,6 +51,12 @@ public class RoomController {
         return ResponseEntity.ok(roomService.updateRoomType(id, request));
     }
 
+    @DeleteMapping("/room-types/{id}")
+    public ResponseEntity<Void> deleteRoomType(@PathVariable Long id) {
+        roomService.deleteRoomType(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // Room endpoints
     @GetMapping("/rooms")
     public ResponseEntity<Page<RoomDTO>> getAllRooms(
@@ -77,11 +83,40 @@ public class RoomController {
         return ResponseEntity.ok(roomService.bulkCreateRooms(request));
     }
 
+    @GetMapping("/rooms/{id}")
+    public ResponseEntity<RoomDTO> getRoomById(@PathVariable Long id) {
+        return ResponseEntity.ok(roomService.getRoomById(id));
+    }
+
+    @PostMapping("/rooms")
+    public ResponseEntity<RoomDTO> createRoom(@Valid @RequestBody CreateRoomRequest request) {
+        return ResponseEntity.ok(roomService.createRoom(request));
+    }
+
+    @PutMapping("/rooms/{id}")
+    public ResponseEntity<RoomDTO> updateRoom(@PathVariable Long id,
+                                               @Valid @RequestBody CreateRoomRequest request) {
+        return ResponseEntity.ok(roomService.updateRoom(id, request));
+    }
+
+    @DeleteMapping("/rooms/{id}")
+    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
+        roomService.deleteRoom(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/rooms/{id}/status")
     public ResponseEntity<RoomDTO> updateRoomStatus(@PathVariable Long id,
-                                                     @RequestBody Map<String, String> body) {
-        Room.RoomStatus status = Room.RoomStatus.valueOf(body.get("status"));
-        return ResponseEntity.ok(roomService.updateRoomStatus(id, status));
+                                                     @RequestParam(required = false) Room.RoomStatus status,
+                                                     @RequestBody(required = false) Map<String, String> body) {
+        Room.RoomStatus targetStatus = status;
+        if (targetStatus == null && body != null && body.containsKey("status")) {
+            targetStatus = Room.RoomStatus.valueOf(body.get("status"));
+        }
+        if (targetStatus == null) {
+            throw new RuntimeException("Status parameter is required");
+        }
+        return ResponseEntity.ok(roomService.updateRoomStatus(id, targetStatus));
     }
 
     @GetMapping("/rooms/availability")

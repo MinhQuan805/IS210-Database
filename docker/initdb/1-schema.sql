@@ -85,7 +85,7 @@ CREATE TABLE room_type_images (
     room_type_id NUMBER NOT NULL,
     image_url VARCHAR2(500) NOT NULL,
     CONSTRAINT pk_room_type_images PRIMARY KEY (room_type_id, image_url),
-    CONSTRAINT fk_rti_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id)
+    CONSTRAINT fk_rti_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE
 );
 
 -- Bảng room_type_amenities
@@ -93,8 +93,8 @@ CREATE TABLE room_type_amenities (
     room_type_id NUMBER NOT NULL,
     amenity_id NUMBER NOT NULL,
     CONSTRAINT pk_room_type_amenities PRIMARY KEY (room_type_id, amenity_id),
-    CONSTRAINT fk_rta_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id),
-    CONSTRAINT fk_rta_amenity FOREIGN KEY (amenity_id) REFERENCES amenities(id)
+    CONSTRAINT fk_rta_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE,
+    CONSTRAINT fk_rta_amenity FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE
 );
 
 -- Bảng rooms
@@ -107,7 +107,7 @@ CREATE TABLE rooms (
     notes VARCHAR2(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_rooms_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+    CONSTRAINT fk_rooms_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE,
     CONSTRAINT chk_rooms_status CHECK (status IN ('AVAILABLE', 'OCCUPIED', 'MAINTENANCE', 'RESERVED'))
 );
 
@@ -118,7 +118,7 @@ CREATE TABLE daily_prices (
     price_date DATE NOT NULL,
     price NUMBER(12,2) NOT NULL,
     reason VARCHAR2(500),
-    CONSTRAINT fk_dprices_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+    CONSTRAINT fk_dprices_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE,
     CONSTRAINT uk_dprices_roomtype_date UNIQUE (room_type_id, price_date)
 );
 
@@ -131,7 +131,7 @@ CREATE TABLE seasonal_prices (
     end_date DATE NOT NULL,
     price_multiplier NUMBER(10,2) NOT NULL,
     priority NUMBER(10,0) NOT NULL,
-    CONSTRAINT fk_sprices_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id),
+    CONSTRAINT fk_sprices_room_type FOREIGN KEY (room_type_id) REFERENCES room_types(id) ON DELETE CASCADE,
     CONSTRAINT chk_seasonal_dates CHECK (end_date >= start_date)
 );
 
@@ -148,8 +148,8 @@ CREATE TABLE bookings (
     status VARCHAR2(20) NOT NULL,
     special_requests VARCHAR2(1000),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_bookings_customer FOREIGN KEY (customer_id) REFERENCES customers(id),
-    CONSTRAINT fk_bookings_room FOREIGN KEY (room_id) REFERENCES rooms(id),
+    CONSTRAINT fk_bookings_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    CONSTRAINT fk_bookings_room FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
     CONSTRAINT chk_bookings_status CHECK (status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN', 'CHECKED_OUT', 'CANCELLED')),
     CONSTRAINT chk_bookings_dates CHECK (check_out_date > check_in_date)
 );
@@ -162,7 +162,7 @@ CREATE TABLE booking_history (
     performed_by VARCHAR2(100),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     notes VARCHAR2(500),
-    CONSTRAINT fk_bhistory_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
+    CONSTRAINT fk_bhistory_booking FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
     CONSTRAINT chk_booking_history_action CHECK (action IN ('CREATED', 'CONFIRMED', 'CANCELLED', 'UPDATED')),
     CONSTRAINT chk_booking_history_performed_by CHECK (performed_by IN ('SYSTEM', 'ADMIN', 'CUSTOMER'))
 );
@@ -186,7 +186,7 @@ CREATE TABLE payment (
    payment_date TIMESTAMP NOT NULL,
    amount NUMBER(12,2) NOT NULL, 
    status VARCHAR2(20) DEFAULT 'PENDING' NOT NULL,
-   CONSTRAINT fk_payment_booking_id FOREIGN KEY (booking_id) REFERENCES bookings(id),
+   CONSTRAINT fk_payment_booking_id FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
    CONSTRAINT chk_payment_status CHECK (status IN ('SUCCESS', 'PENDING', 'FAILED'))
 );
 
@@ -195,8 +195,8 @@ CREATE TABLE booking_promotions (
     booking_id NUMBER NOT NULL,
     promotion_id NUMBER NOT NULL,
     CONSTRAINT pk_booking_promotions PRIMARY KEY (booking_id, promotion_id),
-    CONSTRAINT fk_bpromo_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
-    CONSTRAINT fk_bpromo_promotion FOREIGN KEY (promotion_id) REFERENCES promotions(id)
+    CONSTRAINT fk_bpromo_booking FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    CONSTRAINT fk_bpromo_promotion FOREIGN KEY (promotion_id) REFERENCES promotions(id) ON DELETE CASCADE
 );
 
 -- Bảng booking_policies
@@ -204,8 +204,8 @@ CREATE TABLE booking_policies (
     booking_id NUMBER NOT NULL,
     policy_id NUMBER NOT NULL,
     CONSTRAINT pk_booking_policies PRIMARY KEY (booking_id, policy_id),
-    CONSTRAINT fk_bpolicy_booking FOREIGN KEY (booking_id) REFERENCES bookings(id),
-    CONSTRAINT fk_bpolicy_policy FOREIGN KEY (policy_id) REFERENCES policies(id)
+    CONSTRAINT fk_bpolicy_booking FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE,
+    CONSTRAINT fk_bpolicy_policy FOREIGN KEY (policy_id) REFERENCES policies(id) ON DELETE CASCADE
 );
 
 -- Bảng users
@@ -244,7 +244,7 @@ CREATE TABLE reviews (
     content CLOB,
     status VARCHAR2(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_reviews_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT chk_reviews_rating CHECK (rating >= 1 AND rating <= 5),
     CONSTRAINT chk_reviews_status CHECK (status IN ('PENDING', 'REJECTED', 'APPROVED'))
 );
@@ -254,7 +254,7 @@ CREATE TABLE review_images (
     review_id NUMBER NOT NULL,
     image_url VARCHAR2(500) NOT NULL,
     CONSTRAINT pk_review_images PRIMARY KEY (review_id, image_url),
-    CONSTRAINT fk_rimages_review FOREIGN KEY (review_id) REFERENCES reviews(id)
+    CONSTRAINT fk_rimages_review FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
 );
 
 -- Bảng sales_reports
@@ -276,7 +276,7 @@ CREATE TABLE chat_conversations (
     status VARCHAR2(20) DEFAULT 'OPEN' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_chat_conv_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_chat_conv_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT chk_chat_conv_status CHECK (status IN ('OPEN', 'CLOSED'))
 );
 
@@ -290,7 +290,7 @@ CREATE TABLE chat_messages (
     read_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT fk_chat_msg_conversation FOREIGN KEY (chat_conversation_id) REFERENCES chat_conversations(id) ON DELETE CASCADE,
-    CONSTRAINT fk_chat_msg_admin FOREIGN KEY (admin_id) REFERENCES users(id),
+    CONSTRAINT fk_chat_msg_admin FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT ck_chat_msg_sender_type CHECK (sender_type IN ('CLIENT', 'ADMIN')),
     CONSTRAINT ck_chat_msg_is_read CHECK (is_read IN (0, 1))
 );

@@ -83,4 +83,10 @@ public class CustomerController {
     public ResponseEntity<CustomerStatsDTO> getCustomerStats(@PathVariable Long id) {
         return ResponseEntity.ok(customerService.getCustomerStats(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+        customerService.deleteCustomer(id);
+        return ResponseEntity.noContent().build();
+    }
 }

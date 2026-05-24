@@ -135,6 +135,11 @@ public class UserService {
         if (!userRepository.existsById(id)) {
             throw new RuntimeException("User not found with id: " + id);
         }
-        userRepository.deleteById(id);
+        try {
+            userRepository.deleteById(id);
+            userRepository.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa người dùng vì có dữ liệu liên quan (đánh giá, tin nhắn). Hãy xóa dữ liệu liên quan trước.");
+        }
     }
 }

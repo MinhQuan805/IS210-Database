@@ -73,6 +73,23 @@ public class PricingService {
         seasonalPriceRepository.deleteById(id);
     }
 
+    @Transactional
+    public SeasonalPriceDTO updateSeasonalPrice(Long id, Long roomTypeId, String name,
+                                                 LocalDate startDate, LocalDate endDate,
+                                                 BigDecimal priceMultiplier, Integer priority) {
+        SeasonalPrice sp = seasonalPriceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Seasonal price not found with id: " + id));
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new RuntimeException("Room type not found"));
+        sp.setRoomType(roomType);
+        sp.setName(name);
+        sp.setStartDate(startDate);
+        sp.setEndDate(endDate);
+        sp.setPriceMultiplier(priceMultiplier);
+        sp.setPriority(priority != null ? priority : 0);
+        return SeasonalPriceDTO.fromEntity(seasonalPriceRepository.save(sp));
+    }
+
     @Transactional(readOnly = true)
     public List<DailyPriceDTO> getDailyPrices(Long roomTypeId, LocalDate startDate, LocalDate endDate) {
         // TH1: Tìm price theo roomTypeId
@@ -169,6 +186,27 @@ public class PricingService {
         return DailyPriceDTO.fromEntity(dailyPriceRepository.save(dp));
     }
 
+    @Transactional
+    public DailyPriceDTO updateDailyPrice(Long id, Long roomTypeId, LocalDate date, BigDecimal price, String reason) {
+        DailyPrice dp = dailyPriceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Daily price not found with id: " + id));
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new RuntimeException("Room type not found"));
+        dp.setRoomType(roomType);
+        dp.setDate(date);
+        dp.setPrice(price);
+        dp.setReason(reason);
+        return DailyPriceDTO.fromEntity(dailyPriceRepository.save(dp));
+    }
+
+    @Transactional
+    public void deleteDailyPrice(Long id) {
+        if (!dailyPriceRepository.existsById(id)) {
+            throw new RuntimeException("Daily price not found with id: " + id);
+        }
+        dailyPriceRepository.deleteById(id);
+    }
+
     // Promotions
     @Transactional(readOnly = true)
     public List<PromotionDTO> getAllPromotions() {
@@ -200,6 +238,50 @@ public class PricingService {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
         return PromotionDTO.fromEntity(promotionRepository.save(promotion));
+    }
+
+    @Transactional(readOnly = true)
+    public List<PromotionDTO> getActivePromotions() {
+        LocalDate today = LocalDate.now();
+        return promotionRepository.findAll().stream()
+                .filter(p -> !p.getStartDate().isAfter(today) && !p.getEndDate().isBefore(today) 
+                        && (p.getMaxUses() == null || p.getUsedCount() < p.getMaxUses()))
+                .map(PromotionDTO::fromEntity)
+                .toList();
+    }
+
+    @Transactional
+    public PromotionDTO updatePromotion(Long id, CreatePromotionRequest request) {
+        Promotion promotion = promotionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
+        
+        if (!promotion.getCode().equalsIgnoreCase(request.getCode()) && promotionRepository.existsByCode(request.getCode())) {
+            throw new RuntimeException("Promotion code already exists: " + request.getCode());
+        }
+
+        promotion.setCode(request.getCode().toUpperCase());
+        promotion.setDescription(request.getDescription());
+        promotion.setDiscountType(request.getDiscountType());
+        promotion.setDiscountValue(request.getDiscountValue());
+        promotion.setStartDate(request.getStartDate());
+        promotion.setEndDate(request.getEndDate());
+        promotion.setMinNights(request.getMinNights());
+        promotion.setMaxUses(request.getMaxUses());
+
+        return PromotionDTO.fromEntity(promotionRepository.save(promotion));
+    }
+
+    @Transactional
+    public void deletePromotion(Long id) {
+        if (!promotionRepository.existsById(id)) {
+            throw new RuntimeException("Promotion not found with id: " + id);
+        }
+        try {
+            promotionRepository.deleteById(id);
+            promotionRepository.flush();
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể xóa khuyến mãi vì đã được sử dụng trong đặt phòng.");
+        }
     }
 
     @Transactional

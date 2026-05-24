@@ -195,6 +195,37 @@ public class BookingService {
         return BookingDTO.fromEntity(saved);
     }
 
+    @Transactional
+    public BookingDTO checkInBooking(Long id, BookingActor performedBy) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+
+        booking.setStatus(Booking.BookingStatus.CHECKED_IN);
+        Booking saved = bookingRepository.save(booking);
+        addHistory(saved, BookingAction.UPDATED, performedBy, "Đã nhận phòng đặt phòng");
+
+        return BookingDTO.fromEntity(saved);
+    }
+
+    @Transactional
+    public BookingDTO checkOutBooking(Long id, BookingActor performedBy) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+
+        booking.setStatus(Booking.BookingStatus.CHECKED_OUT);
+        Booking saved = bookingRepository.save(booking);
+        addHistory(saved, BookingAction.UPDATED, performedBy, "Đã trả phòng đặt phòng");
+
+        return BookingDTO.fromEntity(saved);
+    }
+
+    @Transactional
+    public void deleteBooking(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+        bookingRepository.delete(booking);
+    }
+
     @Transactional(readOnly = true)
     public List<BookingHistoryDTO> getBookingHistory(Long bookingId) {
         return bookingHistoryRepository.findByBookingIdOrderByTimestampDesc(bookingId)

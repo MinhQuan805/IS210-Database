@@ -49,6 +49,21 @@ public class PricingController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/pricing/seasonal/{id}")
+    public ResponseEntity<SeasonalPriceDTO> updateSeasonalPrice(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long roomTypeId = Long.valueOf(body.get("roomTypeId").toString());
+        String name = (String) body.get("name");
+        LocalDate startDate = LocalDate.parse((String) body.get("startDate"));
+        LocalDate endDate = LocalDate.parse((String) body.get("endDate"));
+        BigDecimal priceMultiplier = new BigDecimal(body.get("priceMultiplier").toString());
+        Integer priority = body.get("priority") != null ? Integer.valueOf(body.get("priority").toString()) : null;
+
+        return ResponseEntity.ok(pricingService.updateSeasonalPrice(id, roomTypeId, name, startDate, endDate,
+                priceMultiplier, priority));
+    }
+
     // Daily Pricing
     @GetMapping("/pricing/daily")
     public ResponseEntity<List<DailyPriceDTO>> getDailyPrices(
@@ -58,15 +73,30 @@ public class PricingController {
         return ResponseEntity.ok(pricingService.getDailyPrices(roomTypeId, startDate, endDate));
     }
 
-    @PutMapping("/pricing/daily/{roomTypeId}")
-    public ResponseEntity<DailyPriceDTO> setDailyPrice(
-            @PathVariable Long roomTypeId,
-            @RequestBody Map<String, Object> body) {
+    @PostMapping("/pricing/daily")
+    public ResponseEntity<DailyPriceDTO> createDailyPrice(@RequestBody Map<String, Object> body) {
+        Long roomTypeId = Long.valueOf(body.get("roomTypeId").toString());
         LocalDate date = LocalDate.parse((String) body.get("date"));
         BigDecimal price = new BigDecimal(body.get("price").toString());
         String reason = (String) body.get("reason");
-
         return ResponseEntity.ok(pricingService.setDailyPrice(roomTypeId, date, price, reason));
+    }
+
+    @PutMapping("/pricing/daily/{id}")
+    public ResponseEntity<DailyPriceDTO> updateDailyPrice(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> body) {
+        Long roomTypeId = Long.valueOf(body.get("roomTypeId").toString());
+        LocalDate date = LocalDate.parse((String) body.get("date"));
+        BigDecimal price = new BigDecimal(body.get("price").toString());
+        String reason = (String) body.get("reason");
+        return ResponseEntity.ok(pricingService.updateDailyPrice(id, roomTypeId, date, price, reason));
+    }
+
+    @DeleteMapping("/pricing/daily/{id}")
+    public ResponseEntity<Void> deleteDailyPrice(@PathVariable Long id) {
+        pricingService.deleteDailyPrice(id);
+        return ResponseEntity.noContent().build();
     }
 
     // Promotions
@@ -83,5 +113,23 @@ public class PricingController {
     @PutMapping("/pricing/promotions/{id}/toggle")
     public ResponseEntity<PromotionDTO> togglePromotion(@PathVariable Long id) {
         return ResponseEntity.ok(pricingService.togglePromotion(id));
+    }
+
+    @GetMapping("/pricing/promotions/active")
+    public ResponseEntity<List<PromotionDTO>> getActivePromotions() {
+        return ResponseEntity.ok(pricingService.getActivePromotions());
+    }
+
+    @PutMapping("/pricing/promotions/{id}")
+    public ResponseEntity<PromotionDTO> updatePromotion(
+            @PathVariable Long id,
+            @Valid @RequestBody CreatePromotionRequest request) {
+        return ResponseEntity.ok(pricingService.updatePromotion(id, request));
+    }
+
+    @DeleteMapping("/pricing/promotions/{id}")
+    public ResponseEntity<Void> deletePromotion(@PathVariable Long id) {
+        pricingService.deletePromotion(id);
+        return ResponseEntity.noContent().build();
     }
 }
