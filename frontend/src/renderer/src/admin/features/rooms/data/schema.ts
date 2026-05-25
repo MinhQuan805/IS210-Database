@@ -49,7 +49,7 @@ export const createRoomTypeSchema = z.object({
   capacity: z.number().min(1, 'Sức chứa phải lớn hơn 0.'),
   basePrice: z.number().min(0, 'Giá cơ bản không được âm.'),
   images: z.array(z.string()).default([]),
-  amenities: z.array(z.string()).default([])
+  amenities: z.array(amenitiesSchema).default([])
 })
 export type CreateRoomTypeRequest = z.infer<typeof createRoomTypeSchema>
 
