@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "booking_promotions")
 public class BookingPromotion {
-    // @Id
-    // @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "booking_promotion_seq")
-    // @SequenceGenerator(name = "booking_promotion_seq", sequenceName = "BOOKING_PROMOTION_SEQ", allocationSize = 1)
-    // private Long id;
 
     @EmbeddedId
     private BookingPromotionId id;
@@ -56,5 +52,4 @@ public class BookingPromotion {
         this.promotion = promotion;
     }
 
-    
 }

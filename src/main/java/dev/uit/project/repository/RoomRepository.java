@@ -28,25 +28,17 @@ public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificat
 
     List<Room> findByFloor(Integer floor);
 
-    @Query("SELECT r FROM Room r WHERE r.id NOT IN " +
-            "(SELECT b.room.id FROM Booking b WHERE b.status NOT IN ('CANCELLED', 'CHECKED_OUT') " +
-            "AND b.checkInDate < :checkOutDate AND b.checkOutDate > :checkInDate)")
+    @Query(value = "SELECT * FROM rooms r WHERE hotel.fn_check_room_availability(r.id, :checkInDate, :checkOutDate, NULL) = 1", nativeQuery = true)
     List<Room> findAvailableRooms(@Param("checkInDate") LocalDate checkInDate,
                                   @Param("checkOutDate") LocalDate checkOutDate);
     
-    @Query("""
-        SELECT r 
-        FROM Room r
-        JOIN r.roomType rt
+    @Query(value = """
+        SELECT r.* 
+        FROM rooms r
+        JOIN room_types rt ON r.room_type_id = rt.id
         WHERE rt.capacity >= :capacity
-        AND r.id NOT IN (
-                SELECT b.room.id 
-                FROM Booking b 
-                WHERE b.status NOT IN ('CANCELLED', 'CHECKED_OUT')
-                AND b.checkInDate < :checkOutDate
-                AND b.checkOutDate > :checkInDate
-        )
-    """)
+        AND hotel.fn_check_room_availability(r.id, :checkInDate, :checkOutDate, NULL) = 1
+    """, nativeQuery = true)
     List<Room> findAvailableRooms(
             @Param("checkInDate") LocalDate checkInDate,
             @Param("checkOutDate") LocalDate checkOutDate,

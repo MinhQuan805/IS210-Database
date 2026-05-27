@@ -4,6 +4,7 @@ import { z } from 'zod'
 export const createBookingSchema = z
   .object({
     customer: createCustomerSchema,
+    promotionCode: z.string().trim().optional(),
     specialRequests: z.string(),
     isAcceptPolicies: z.boolean()
   })

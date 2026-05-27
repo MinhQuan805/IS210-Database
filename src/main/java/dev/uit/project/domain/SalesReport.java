@@ -3,8 +3,6 @@ package dev.uit.project.domain;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-
-
 import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
@@ -37,4 +35,69 @@ public class SalesReport {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // Getters and Setters
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public java.sql.Date getReportDate() {
+        return reportDate;
+    }
+
+    public void setReportDate(java.sql.Date reportDate) {
+        this.reportDate = reportDate;
+    }
+
+    public Integer getTotalBookings() {
+        return totalBookings;
+    }
+
+    public void setTotalBookings(Integer totalBookings) {
+        this.totalBookings = totalBookings;
+    }
+
+    public BigDecimal getGrossRevenue() {
+        return grossRevenue;
+    }
+
+    public void setGrossRevenue(BigDecimal grossRevenue) {
+        this.grossRevenue = grossRevenue;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public BigDecimal getNetRevenue() {
+        return netRevenue;
+    }
+
+    public void setNetRevenue(BigDecimal netRevenue) {
+        this.netRevenue = netRevenue;
+    }
+
+    public BigDecimal getRoomOccupancyRate() {
+        return roomOccupancyRate;
+    }
+
+    public void setRoomOccupancyRate(BigDecimal roomOccupancyRate) {
+        this.roomOccupancyRate = roomOccupancyRate;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }

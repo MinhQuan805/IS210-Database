@@ -11,6 +11,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
+
 import dev.uit.project.domain.Amenity;
 import dev.uit.project.domain.Booking;
 import dev.uit.project.domain.BookingHistory;
@@ -43,6 +48,9 @@ import dev.uit.project.repository.RoomTypeRepository;
 @Service
 public class BookingService {
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final BookingRepository bookingRepository;
     private final BookingHistoryRepository bookingHistoryRepository;
     private final CustomerRepository customerRepository;
@@ -70,8 +78,8 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public Page<BookingDTO> getAllBookings(Booking.BookingStatus status, Long customerId,
-                                           LocalDate startDate, LocalDate endDate,
-                                           Pageable pageable) {
+            LocalDate startDate, LocalDate endDate,
+            Pageable pageable) {
         Specification<Booking> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (status != null) {
@@ -99,78 +107,74 @@ public class BookingService {
 
     @Transactional
     public BookingDTO createBooking(CreateBookingRequest request, BookingActor performedBy) {
-        Customer customer = customerRepository.findById(request.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
         Room room = roomRepository.findById(request.getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
+        Long roomTypeId = room.getRoomType().getId();
+        String promotionCode = normalizePromotionCode(request.getPromotionCode());
 
-        Booking booking = new Booking();
-        booking.setCustomer(customer);
-        booking.setRoom(room);
-        booking.setCheckInDate(request.getCheckInDate());
-        booking.setCheckOutDate(request.getCheckOutDate());
-        booking.setRawPrice(pricingService.getRawPrice(room.getRoomType().getId(), request.getCheckInDate(), request.getCheckOutDate()));
-        booking.setTotalPrice(BigDecimal.ZERO); // Để tạm, trigger tính lại sau
-        booking.setDiscountAmount(BigDecimal.ZERO); // Để tạm, trigger tính lại sau
-        booking.setStatus(Booking.BookingStatus.PENDING);
-        booking.setSpecialRequests(request.getSpecialRequests());
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("hotel.sp_create_booking");
+        query.registerStoredProcedureParameter("p_customer_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_room_type_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_check_in_date", java.sql.Date.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_check_out_date", java.sql.Date.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_promotion_code", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_special_requests", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("o_booking_id", Long.class, ParameterMode.OUT);
 
-        Booking saved = bookingRepository.save(booking);
-        addHistory(saved, BookingAction.CREATED, performedBy, "Đã đặt phòng");
+        try {
+            query.setParameter("p_customer_id", request.getCustomerId());
+            query.setParameter("p_room_type_id", roomTypeId);
+            query.setParameter("p_check_in_date", java.sql.Date.valueOf(request.getCheckInDate()));
+            query.setParameter("p_check_out_date", java.sql.Date.valueOf(request.getCheckOutDate()));
+            query.setParameter("p_promotion_code", promotionCode);
+            query.setParameter("p_special_requests", request.getSpecialRequests());
 
-        // Gán tất cả policy cho bookings
+            query.execute();
+        } catch (Exception ex) {
+            throw mapStoredProcedureException(ex);
+        }
+        Long bookingId = (Long) query.getOutputParameterValue("o_booking_id");
 
-        List<Policy> policies = policyRepository.findAll();
-
-        List<BookingPolicy> bookingPolicies = policies.stream()
-            .map(policy -> {
-                BookingPolicyId bpId = new BookingPolicyId(saved.getId(), policy.getId());
-                return new BookingPolicy(bpId, saved, policy);
-            })
-            .collect(Collectors.toList());
-
-        bookingPolicyRepository.saveAll(bookingPolicies);
-
+        Booking saved = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Failed to find created booking with id: " + bookingId));
         return BookingDTO.fromEntity(saved);
     }
 
     @Transactional
     public BookingDTO confirmBooking(Long id, BookingActor performedBy) {
-        Booking booking = bookingRepository.findById(id)
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("hotel.sp_update_booking_status");
+        query.registerStoredProcedureParameter("p_booking_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_new_status", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_performed_by", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_notes", String.class, ParameterMode.IN);
+
+        query.setParameter("p_booking_id", id);
+        query.setParameter("p_new_status", "CONFIRMED");
+        query.setParameter("p_performed_by", performedBy.name());
+        query.setParameter("p_notes", "Đã xác nhận đặt phòng");
+        query.execute();
+
+        Booking saved = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
-
-        if (booking.getStatus() != Booking.BookingStatus.PENDING) {
-            throw new RuntimeException("Only PENDING bookings can be confirmed");
-        }
-
-        booking.setStatus(Booking.BookingStatus.CONFIRMED);
-        Booking saved = bookingRepository.save(booking);
-        addHistory(saved, BookingAction.CONFIRMED, performedBy, "Đã xác nhận đặt phòng");
-
         return BookingDTO.fromEntity(saved);
     }
 
     @Transactional
     public BookingDTO cancelBooking(Long id, String reason, BookingActor performedBy) {
-        Booking booking = bookingRepository.findById(id)
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("hotel.sp_update_booking_status");
+        query.registerStoredProcedureParameter("p_booking_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_new_status", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_performed_by", String.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_notes", String.class, ParameterMode.IN);
+
+        query.setParameter("p_booking_id", id);
+        query.setParameter("p_new_status", "CANCELLED");
+        query.setParameter("p_performed_by", performedBy.name());
+        query.setParameter("p_notes", reason != null ? reason : "Đã hủy đặt phòng");
+        query.execute();
+
+        Booking saved = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
-
-        if (booking.getStatus() == Booking.BookingStatus.CHECKED_OUT ||
-                booking.getStatus() == Booking.BookingStatus.CANCELLED) {
-            throw new RuntimeException("Cannot cancel a booking that is already " + booking.getStatus());
-        }
-
-        booking.setStatus(Booking.BookingStatus.CANCELLED);
-        Booking saved = bookingRepository.save(booking);
-        addHistory(saved, BookingAction.CANCELLED, performedBy, reason != null ? reason : "Đã hủy đặt phòng");
-
-        // Set room back to available
-        Room room = booking.getRoom();
-        if (room.getStatus() == Room.RoomStatus.RESERVED) {
-            room.setStatus(Room.RoomStatus.AVAILABLE);
-            roomRepository.save(room);
-        }
-
         return BookingDTO.fromEntity(saved);
     }
 
@@ -184,10 +188,14 @@ public class BookingService {
                     .orElseThrow(() -> new RuntimeException("Room not found"));
             booking.setRoom(newRoom);
         }
-        if (request.getCheckInDate() != null) booking.setCheckInDate(request.getCheckInDate());
-        if (request.getCheckOutDate() != null) booking.setCheckOutDate(request.getCheckOutDate());
-        if (request.getTotalPrice() != null) booking.setTotalPrice(request.getTotalPrice());
-        if (request.getSpecialRequests() != null) booking.setSpecialRequests(request.getSpecialRequests());
+        if (request.getCheckInDate() != null)
+            booking.setCheckInDate(request.getCheckInDate());
+        if (request.getCheckOutDate() != null)
+            booking.setCheckOutDate(request.getCheckOutDate());
+        if (request.getTotalPrice() != null)
+            booking.setTotalPrice(request.getTotalPrice());
+        if (request.getSpecialRequests() != null)
+            booking.setSpecialRequests(request.getSpecialRequests());
 
         Booking saved = bookingRepository.save(booking);
         addHistory(saved, BookingAction.UPDATED, performedBy, "Đã cập nhật thông tin đặt phòng");
@@ -197,25 +205,31 @@ public class BookingService {
 
     @Transactional
     public BookingDTO checkInBooking(Long id, BookingActor performedBy) {
-        Booking booking = bookingRepository.findById(id)
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("hotel.sp_process_check_in");
+        query.registerStoredProcedureParameter("p_booking_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_performed_by", String.class, ParameterMode.IN);
+
+        query.setParameter("p_booking_id", id);
+        query.setParameter("p_performed_by", performedBy.name());
+        query.execute();
+
+        Booking saved = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
-
-        booking.setStatus(Booking.BookingStatus.CHECKED_IN);
-        Booking saved = bookingRepository.save(booking);
-        addHistory(saved, BookingAction.UPDATED, performedBy, "Đã nhận phòng đặt phòng");
-
         return BookingDTO.fromEntity(saved);
     }
 
     @Transactional
     public BookingDTO checkOutBooking(Long id, BookingActor performedBy) {
-        Booking booking = bookingRepository.findById(id)
+        StoredProcedureQuery query = entityManager.createStoredProcedureQuery("hotel.sp_process_check_out");
+        query.registerStoredProcedureParameter("p_booking_id", Long.class, ParameterMode.IN);
+        query.registerStoredProcedureParameter("p_performed_by", String.class, ParameterMode.IN);
+
+        query.setParameter("p_booking_id", id);
+        query.setParameter("p_performed_by", performedBy.name());
+        query.execute();
+
+        Booking saved = bookingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
-
-        booking.setStatus(Booking.BookingStatus.CHECKED_OUT);
-        Booking saved = bookingRepository.save(booking);
-        addHistory(saved, BookingAction.UPDATED, performedBy, "Đã trả phòng đặt phòng");
-
         return BookingDTO.fromEntity(saved);
     }
 
@@ -244,16 +258,16 @@ public class BookingService {
     @Transactional(readOnly = true)
     public BookingDetailDTO getBookingDetail(Long bookingId, String email) {
         Booking booking = bookingRepository
-            .findByIdAndCustomerEmail(bookingId, email)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
+                .findByIdAndCustomerEmail(bookingId, email)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         RoomType roomType = roomTypeRepository
-            .findByBookingId(bookingId)
-            .orElseThrow(() -> new RuntimeException("Room type not found"));
-        
+                .findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Room type not found"));
+
         List<Amenity> amenities = amenityRepository
-            .findByBookingId(bookingId);
-        
+                .findByBookingId(bookingId);
+
         BookingDetailDTO dto = new BookingDetailDTO();
 
         dto.setId(booking.getId());
@@ -272,35 +286,78 @@ public class BookingService {
         dto.setFloor(booking.getRoom().getFloor());
 
         dto.setAmenities(
-            amenities.stream()
-                .map(AmenityDTO::fromEntity)
-                .toList()
-        );
+                amenities.stream()
+                        .map(AmenityDTO::fromEntity)
+                        .toList());
 
         dto.setHistory(
-            booking.getHistory().stream()
-                .map(BookingHistoryDTO::fromEntity)
-                .toList()
-        );
+                booking.getHistory().stream()
+                        .map(BookingHistoryDTO::fromEntity)
+                        .toList());
 
         dto.setPayments(
-            booking.getPayments().stream()
-                .map(PaymentDTO::fromEntity)
-                .toList()  
-        );
+                booking.getPayments().stream()
+                        .map(PaymentDTO::fromEntity)
+                        .toList());
 
         dto.setPromotions(
-            booking.getPromotions().stream()
-                .map(PromotionDTO::fromEntity)
-                .toList()
-        );
+                booking.getPromotions().stream()
+                        .map(PromotionDTO::fromEntity)
+                        .toList());
 
         dto.setPolicies(
-            booking.getPolicies().stream()
-                .map(PolicyDTO::fromEntity)
-                .toList()
-        );
+                booking.getPolicies().stream()
+                        .map(PolicyDTO::fromEntity)
+                        .toList());
 
         return dto;
+    }
+
+    private String normalizePromotionCode(String promotionCode) {
+        if (promotionCode == null) {
+            return null;
+        }
+        String trimmed = promotionCode.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private RuntimeException mapStoredProcedureException(Exception ex) {
+        String message = null;
+        Throwable current = ex;
+        while (current != null) {
+            if (current.getMessage() != null) {
+                message = current.getMessage();
+            }
+            current = current.getCause();
+        }
+
+        String oracleMessage = extractOracleMessage(message);
+        if (oracleMessage != null && !oracleMessage.isEmpty()) {
+            return new RuntimeException(oracleMessage);
+        }
+        if (message != null && !message.isEmpty()) {
+            return new RuntimeException(message);
+        }
+        return new RuntimeException("Không thể tạo đặt phòng. Vui lòng thử lại.");
+    }
+
+    private String extractOracleMessage(String message) {
+        if (message == null) {
+            return null;
+        }
+        int oraIndex = message.indexOf("ORA-");
+        if (oraIndex == -1) {
+            return null;
+        }
+        String oraPart = message.substring(oraIndex);
+        int newlineIndex = oraPart.indexOf('\n');
+        if (newlineIndex != -1) {
+            oraPart = oraPart.substring(0, newlineIndex);
+        }
+        int colonIndex = oraPart.indexOf(':');
+        if (colonIndex != -1 && colonIndex + 1 < oraPart.length()) {
+            return oraPart.substring(colonIndex + 1).trim();
+        }
+        return oraPart.trim();
     }
 }

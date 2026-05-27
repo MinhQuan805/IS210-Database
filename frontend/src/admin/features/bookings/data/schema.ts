@@ -50,6 +50,7 @@ export const createBookingSchema = z.object({
   checkInDate: z.string().min(1, 'Ngày nhận phòng là bắt buộc.'),
   checkOutDate: z.string().min(1, 'Ngày trả phòng là bắt buộc.'),
   // totalPrice: z.number().min(0, 'Tổng giá phải lớn hơn 0.'),
+  promotionCode: z.string().optional(),
   specialRequests: z.string().optional()
 })
 export type CreateBookingRequest = z.infer<typeof createBookingSchema>

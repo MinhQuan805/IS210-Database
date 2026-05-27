@@ -71,6 +71,7 @@ export default function CreateBookingPage({
         notes: '',
         isVIP: false
       },
+      promotionCode: '',
       specialRequests: '',
       isAcceptPolicies: false
     }
@@ -140,11 +141,14 @@ export default function CreateBookingPage({
 
         toast.info('Đang đặt phòng ...')
 
+        const promotionCode = form.getValues().promotionCode?.trim()
+
         const booking = await bookingsApi.create({
           customerId: customer.id,
           roomId,
           checkInDate: format(checkInDate, 'yyyy-MM-dd'),
           checkOutDate: format(checkOutDate, 'yyyy-MM-dd'),
+          promotionCode: promotionCode ? promotionCode : undefined,
           specialRequests: form.getValues().specialRequests
         })
 
@@ -153,7 +157,10 @@ export default function CreateBookingPage({
 
         pdfApi.info(booking.id)
       } catch (err) {
-        toast.error('Đặt phòng thất bại! Hãy thử lại sau.')
+        const message = err instanceof Error && err.message
+          ? err.message
+          : 'Đặt phòng thất bại! Hãy thử lại sau.'
+        toast.error(message)
         console.log(err)
       }
     }
@@ -314,6 +321,20 @@ export default function CreateBookingPage({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="promotionCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mã khuyến mãi (tuỳ chọn)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="VD: SUMMER2026" className="max-w-xs" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* Special Requests — đưa vào FormField để validation hoạt động */}
               <FormField

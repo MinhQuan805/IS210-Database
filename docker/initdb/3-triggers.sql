@@ -85,7 +85,6 @@ COMPOUND TRIGGER
     v_booking_ids  t_booking_id_list;
     v_count        PLS_INTEGER := 0;
 
-    -- Sau khi mỗi dòng được ghi -> Lấy bookings.id của nó
 
     AFTER EACH ROW IS
     BEGIN

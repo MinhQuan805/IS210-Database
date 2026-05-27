@@ -20,7 +20,7 @@ type BookingCardProps = {
   floor: number
 }
 
-const getStatusVariant = (status) => {
+const getStatusVariant = (status: BookingStatus) => {
   switch (status) {
     case 'CONFIRMED':
       return 'default'

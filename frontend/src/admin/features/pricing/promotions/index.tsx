@@ -64,6 +64,21 @@ const formatVND = (price: number) =>
 
 const formatDate = (date: string) => new Date(date).toLocaleDateString('vi-VN')
 
+const toStartOfDay = (date: Date) => {
+  const normalized = new Date(date)
+  normalized.setHours(0, 0, 0, 0)
+  return normalized
+}
+
+const isPromotionActive = (promotion: Promotion) => {
+  const today = toStartOfDay(new Date())
+  const startDate = toStartOfDay(new Date(promotion.startDate))
+  const endDate = toStartOfDay(new Date(promotion.endDate))
+  const withinDate = today >= startDate && today <= endDate
+  const withinUsage = promotion.maxUses == null || promotion.usedCount < promotion.maxUses
+  return withinDate && withinUsage
+}
+
 // --- Context ---
 type DialogType = 'add' | 'edit' | 'delete'
 
@@ -170,8 +185,7 @@ function ActionDialog({
           startDate: currentRow.startDate,
           endDate: currentRow.endDate,
           minNights: currentRow.minNights ?? 0,
-          maxUses: currentRow.maxUses ?? 0,
-          isActive: currentRow.isActive
+          maxUses: currentRow.maxUses ?? 0
         }
       : {
           code: '',
@@ -181,8 +195,7 @@ function ActionDialog({
           startDate: '',
           endDate: '',
           minNights: 0,
-          maxUses: 0,
-          isActive: true
+          maxUses: 0
         }
   })
 
@@ -385,30 +398,6 @@ function ActionDialog({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="isActive"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1">
-                    <FormLabel className="col-span-2 text-end">Trạng thái</FormLabel>
-                    <Select
-                      onValueChange={(val) => field.onChange(val === 'true')}
-                      defaultValue={String(field.value)}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="col-span-4">
-                          <SelectValue placeholder="Chọn trạng thái" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="true">Đang hoạt động</SelectItem>
-                        <SelectItem value="false">Ngừng hoạt động</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage className="col-span-4 col-start-3" />
-                  </FormItem>
-                )}
-              />
             </form>
           </Form>
         </div>
@@ -610,8 +599,8 @@ function PromotionsTable() {
                     {item.usedCount} / {item.maxUses ?? '∞'}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.isActive ? 'default' : 'outline'}>
-                      {item.isActive ? 'Hoạt động' : 'Ngừng'}
+                    <Badge variant={isPromotionActive(item) ? 'default' : 'outline'}>
+                      {isPromotionActive(item) ? 'Hoạt động' : 'Ngừng'}
                     </Badge>
                   </TableCell>
                   <TableCell>

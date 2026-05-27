@@ -11,6 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +24,9 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final RoomTypeRepository roomTypeRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public RoomService(RoomRepository roomRepository, RoomTypeRepository roomTypeRepository) {
         this.roomRepository = roomRepository;
@@ -191,5 +198,16 @@ public class RoomService {
             throw new RuntimeException("Room not found with id: " + id);
         }
         roomRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public int getAvailableRoomCount(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate) {
+        Query query = entityManager.createNativeQuery(
+            "SELECT hotel.fn_get_available_room_count(:roomTypeId, :checkInDate, :checkOutDate) FROM DUAL"
+        );
+        query.setParameter("roomTypeId", roomTypeId);
+        query.setParameter("checkInDate", java.sql.Date.valueOf(checkInDate));
+        query.setParameter("checkOutDate", java.sql.Date.valueOf(checkOutDate));
+        return ((Number) query.getSingleResult()).intValue();
     }
 }

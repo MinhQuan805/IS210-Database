@@ -12,16 +12,21 @@ import dev.uit.project.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class PricingService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     private final SeasonalPriceRepository seasonalPriceRepository;
     private final DailyPriceRepository dailyPriceRepository;
@@ -52,8 +57,8 @@ public class PricingService {
 
     @Transactional
     public SeasonalPriceDTO createSeasonalPrice(Long roomTypeId, String name,
-                                                 LocalDate startDate, LocalDate endDate,
-                                                 BigDecimal priceMultiplier, Integer priority) {
+            LocalDate startDate, LocalDate endDate,
+            BigDecimal priceMultiplier, Integer priority) {
         RoomType roomType = roomTypeRepository.findById(roomTypeId)
                 .orElseThrow(() -> new RuntimeException("Room type not found"));
 
@@ -75,8 +80,8 @@ public class PricingService {
 
     @Transactional
     public SeasonalPriceDTO updateSeasonalPrice(Long id, Long roomTypeId, String name,
-                                                 LocalDate startDate, LocalDate endDate,
-                                                 BigDecimal priceMultiplier, Integer priority) {
+            LocalDate startDate, LocalDate endDate,
+            BigDecimal priceMultiplier, Integer priority) {
         SeasonalPrice sp = seasonalPriceRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Seasonal price not found with id: " + id));
         RoomType roomType = roomTypeRepository.findById(roomTypeId)
@@ -97,7 +102,7 @@ public class PricingService {
             // TH1.1: Tìm tất cả price theo phạm vi
             if (startDate != null && endDate != null) {
                 return dailyPriceRepository.findByRoomTypeIdAndDateBetween(roomTypeId, startDate, endDate)
-                    .stream().map(DailyPriceDTO::fromEntity).toList();
+                        .stream().map(DailyPriceDTO::fromEntity).toList();
             }
             // TH1.2: Tìm tất cả price hiện có
             return dailyPriceRepository.findAll().stream()
@@ -124,8 +129,9 @@ public class PricingService {
             // TH1.1: Tìm tất cả price theo phạm vi
             if (startDate != null && endDate != null) {
                 return seasonalPriceRepository
-                    .findByRoomTypeIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual( roomTypeId, endDate, startDate)
-                    .stream().map(SeasonalPriceDTO::fromEntity).toList();
+                        .findByRoomTypeIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(roomTypeId, endDate,
+                                startDate)
+                        .stream().map(SeasonalPriceDTO::fromEntity).toList();
             }
             // TH1.2: Tìm tất cả price hiện có
             return seasonalPriceRepository.findAll().stream()
@@ -138,10 +144,8 @@ public class PricingService {
         // TH2.1: Tìm tất cả price theo phạm vi
         if (startDate != null && endDate != null) {
             return seasonalPriceRepository.findAll().stream()
-                    .filter(sp ->
-                            !sp.getStartDate().isAfter(endDate) &&
-                            !sp.getEndDate().isBefore(startDate)
-                    )
+                    .filter(sp -> !sp.getStartDate().isAfter(endDate) &&
+                            !sp.getEndDate().isBefore(startDate))
                     .map(SeasonalPriceDTO::fromEntity)
                     .toList();
         }
@@ -244,7 +248,7 @@ public class PricingService {
     public List<PromotionDTO> getActivePromotions() {
         LocalDate today = LocalDate.now();
         return promotionRepository.findAll().stream()
-                .filter(p -> !p.getStartDate().isAfter(today) && !p.getEndDate().isBefore(today) 
+                .filter(p -> !p.getStartDate().isAfter(today) && !p.getEndDate().isBefore(today)
                         && (p.getMaxUses() == null || p.getUsedCount() < p.getMaxUses()))
                 .map(PromotionDTO::fromEntity)
                 .toList();
@@ -254,8 +258,9 @@ public class PricingService {
     public PromotionDTO updatePromotion(Long id, CreatePromotionRequest request) {
         Promotion promotion = promotionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Promotion not found with id: " + id));
-        
-        if (!promotion.getCode().equalsIgnoreCase(request.getCode()) && promotionRepository.existsByCode(request.getCode())) {
+
+        if (!promotion.getCode().equalsIgnoreCase(request.getCode())
+                && promotionRepository.existsByCode(request.getCode())) {
             throw new RuntimeException("Promotion code already exists: " + request.getCode());
         }
 
@@ -284,40 +289,47 @@ public class PricingService {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public BigDecimal getRawPrice(Long roomTypeId, LocalDate checkInDate, LocalDate checkOutDate) {
+        Query query = entityManager.createNativeQuery(
+                "SELECT hotel.fn_calculate_room_price(:roomTypeId, :checkInDate, :checkOutDate) FROM DUAL");
+        query.setParameter("roomTypeId", roomTypeId);
+        query.setParameter("checkInDate", java.sql.Date.valueOf(checkInDate));
+        query.setParameter("checkOutDate", java.sql.Date.valueOf(checkOutDate));
 
-        RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                .orElseThrow(() -> new IllegalArgumentException("RoomType not found"));
-
-        BigDecimal basePrice = roomType.getBasePrice() != null ? roomType.getBasePrice() : BigDecimal.ZERO;
-        BigDecimal total = BigDecimal.ZERO;
-
-        long days = ChronoUnit.DAYS.between(checkInDate, checkOutDate) + 1;
-
-        for (int i = 0; i < days; i++) {
-            LocalDate currDate = checkInDate.plusDays(i);
-
-            // Nếu null thì default
-            BigDecimal dailyPrice = Optional.ofNullable(getDailyPrice(roomTypeId, currDate)).orElse(BigDecimal.ZERO);
-            BigDecimal seasonalMultiplier = Optional.ofNullable(getSeasonalMultiplier(roomTypeId, currDate)).orElse(BigDecimal.ONE);
-
-            BigDecimal dayPrice = basePrice.add(dailyPrice).multiply(seasonalMultiplier);
-            total = total.add(dayPrice);
+        Object result = query.getSingleResult();
+        if (result == null) {
+            return BigDecimal.ZERO;
         }
-
-        return total;
+        return (BigDecimal) result;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public BigDecimal getDiscountAmount(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
         List<Promotion> bookingPromotions = booking.getPromotions();
+        if (bookingPromotions.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
 
-        return bookingPromotions.stream()
-            .map(Promotion::getDiscountValue)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        long numNights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
+        BigDecimal totalDiscount = BigDecimal.ZERO;
+
+        for (Promotion promo : bookingPromotions) {
+            Query query = entityManager.createNativeQuery(
+                    "SELECT hotel.fn_calculate_promotion_discount(:rawPrice, :promoCode, :numNights) FROM DUAL");
+            query.setParameter("rawPrice", booking.getRawPrice());
+            query.setParameter("promoCode", promo.getCode());
+            query.setParameter("numNights", numNights);
+
+            BigDecimal discount = (BigDecimal) query.getSingleResult();
+            if (discount != null) {
+                totalDiscount = totalDiscount.add(discount);
+            }
+        }
+
+        return totalDiscount;
     }
 }

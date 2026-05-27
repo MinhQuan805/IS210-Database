@@ -47,34 +47,26 @@ function AppRouter(): React.JSX.Element {
       {/* Client Routes with Footer */}
       <Route
         path="/"
-        element={
-          <PublicRoute>
-            <ClientApp />
-          </PublicRoute>
-        }
+        element={<ClientApp />}
       />
 
       <Route
         path="/search"
         element={
-          <PublicRoute>
-            <>
-              <SearchPage />
-              <Footer />
-            </>
-          </PublicRoute>
+          <>
+            <SearchPage />
+            <Footer />
+          </>
         }
       />
 
       <Route
         path="/bookingdetail"
         element={
-          <PublicRoute>
-            <>
-              <BookingDetailPage />
-              <Footer />
-            </>
-          </PublicRoute>
+          <>
+            <BookingDetailPage />
+            <Footer />
+          </>
         }
       />
 
