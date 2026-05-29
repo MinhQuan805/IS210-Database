@@ -32,7 +32,7 @@ Lưu ý:
 Path ở máy Bảo:
 
 ```sh
-docker run --name hotel-db -p 1521:1521 -e ORACLE_PASSWORD=Admin123 -v hotel-data:/opt/oracle/oradata -v "D:/UNI DOCS/Hotel/docker/initdb":/docker-entrypoint-initdb.d --health-cmd="healthcheck.sh" gvenzl/oracle-free:23-slim
+docker run --name hotel-db -p 1521:1521 -e ORACLE_PASSWORD=Admin123 -v hotel-data:/opt/oracle/oradata -v "D:/UNI DOCS/IS210-Database-main/docker/initdb":/docker-entrypoint-initdb.d --health-cmd="healthcheck.sh" gvenzl/oracle-free:23-slim
 ```
 
 Path ở máy Quân:
@@ -67,8 +67,9 @@ SELECT * FROM users;
 Để kết nối Oracle SQL Developer với database Oracle đang chạy trong Docker container, bạn làm theo các bước sau:
 
 ### 1. Tạo kết nối mới (New Connection)
+
 1. Mở **Oracle SQL Developer**.
-2. Nhấn nút **`+` (New Connection...)** ở góc trên bên trái cửa sổ *Connections*.
+2. Nhấn nút **`+` (New Connection...)** ở góc trên bên trái cửa sổ _Connections_.
 3. Nhập thông tin kết nối như sau:
    - **Name**: `Hotel_DB` (hoặc tên bất kỳ bạn muốn)
    - **Database Type**: `Oracle`
@@ -78,10 +79,11 @@ SELECT * FROM users;
    - **Role**: `default`
    - **Hostname**: `localhost`
    - **Port**: `1521`
-   - **Service name**: Tích chọn mục này và điền `FREEPDB1` (⚠️ **Quan trọng**: Phải chọn **Service name** chứ *không* dùng **SID**).
+   - **Service name**: Tích chọn mục này và điền `FREEPDB1` (⚠️ **Quan trọng**: Phải chọn **Service name** chứ _không_ dùng **SID**).
 4. Nhấn nút **Test** ở góc dưới. Nếu hiển thị trạng thái `Status: Success` thì nhấn **Save** rồi **Connect**.
 
 ### 2. Chạy code SQL trong SQL Developer
+
 Sau khi kết nối thành công, một Worksheet mới sẽ hiển thị. Bạn có thể chạy code bằng các cách sau:
 
 - **Chạy từng câu lệnh (Run Statement)**:

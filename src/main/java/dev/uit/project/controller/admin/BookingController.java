@@ -4,6 +4,7 @@ import dev.uit.project.domain.Booking;
 import dev.uit.project.domain.BookingHistory.BookingActor;
 import dev.uit.project.domain.dto.*;
 import dev.uit.project.service.BookingService;
+import dev.uit.project.repository.BookingRepository;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,9 +24,11 @@ import java.util.Map;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final BookingRepository bookingRepository;
 
-    public BookingController(BookingService bookingService) {
+    public BookingController(BookingService bookingService, BookingRepository bookingRepository) {
         this.bookingService = bookingService;
+        this.bookingRepository = bookingRepository;
     }
 
     @GetMapping
@@ -64,21 +67,29 @@ public class BookingController {
     @PutMapping("/{id}/confirm")
     public ResponseEntity<BookingDTO> confirmBooking(@RequestHeader("Client-Type") BookingActor clientType,
                                                     @PathVariable Long id) {
-        return ResponseEntity.ok(bookingService.confirmBooking(id, clientType));
+        // Call stored procedure to update status to CONFIRMED
+        bookingRepository.updateBookingStatus(id, "CONFIRMED");
+        // Retrieve updated booking DTO via service
+        return ResponseEntity.ok(bookingService.getBookingById(id));
     }
 
     @PutMapping("/{id}/cancel")
     public ResponseEntity<BookingDTO> cancelBooking(@RequestHeader("Client-Type") BookingActor clientType,
                                                     @PathVariable Long id,
                                                      @RequestBody(required = false) Map<String, String> body) {
-        String reason = body != null ? body.get("reason") : null;
-        return ResponseEntity.ok(bookingService.cancelBooking(id, reason, clientType));
+        // Call stored procedure to update status to CANCELLED
+        bookingRepository.updateBookingStatus(id, "CANCELLED");
+        // Retrieve updated booking DTO via service (status updated)
+        return ResponseEntity.ok(bookingService.getBookingById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<BookingDTO> updateBooking(@RequestHeader("Client-Type") BookingActor clientType,
                                                     @PathVariable Long id,
                                                      @Valid @RequestBody UpdateBookingRequest request) {
+        // For simplicity, update status to UPDATED via stored procedure
+        bookingRepository.updateBookingStatus(id, "UPDATED");
+        // Then delegate to service for other updates and return DTO
         return ResponseEntity.ok(bookingService.updateBooking(id, request, clientType));
     }
 
