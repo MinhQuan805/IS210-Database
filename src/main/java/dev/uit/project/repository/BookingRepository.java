@@ -11,7 +11,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +40,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
         Page<Booking> findByStatus(Booking.BookingStatus status, Pageable pageable);
 
         List<Booking> findByCustomerId(Long customerId);
+
+        Optional<Booking> findByIdAndCustomerEmail(Long bookingId, String email);
 
         Page<Booking> findByCustomerId(Long customerId, Pageable pageable);
 
@@ -81,6 +87,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
         List<Object[]> getPopularRoomTypes(@Param("startDate") LocalDate startDate,
                         @Param("endDate") LocalDate endDate);
 
-        Optional<Booking> findByIdAndCustomerEmail(Long id, String email);
-
+        @Transactional
+        @Modifying
+        @Procedure(procedureName = "update_booking_status")
+        void updateBookingStatus(@Param("p_booking_id") Long bookingId, @Param("p_new_status") String newStatus);
 }
